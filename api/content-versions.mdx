@@ -1,0 +1,84 @@
+---
+title: Content versions
+description: Return the versions in which a specific document exists for a given product.
+---
+
+## Endpoint
+
+```
+GET /api/content-versions
+```
+
+Returns an array of version strings in which a particular document exists for a product. dev-portal uses this endpoint to render the version switcher on documentation pages, showing only the versions where the requested document is actually present.
+
+## Query parameters
+
+<ParamField query="product" type="string" required>
+  The product slug to look up versions for.
+
+  Example: `terraform-enterprise`, `vault`
+
+  The legacy alias `ptfe-releases` is automatically mapped to `terraform-enterprise`.
+</ParamField>
+
+<ParamField query="fullPath" type="string" required>
+  The full document path in the format `doc#<path/to/document>`.
+
+  The path after `#` should be the complete path including any product base path prefix.
+
+  Examples:
+  - `doc#docs/internals`
+  - `doc#cdktf/api-reference/python/classes`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Get versions for a Terraform Enterprise doc
+curl "http://localhost:8080/api/content-versions?product=terraform-enterprise&fullPath=doc%23docs/install/overview"
+```
+
+```bash Get versions for a CDKTF doc
+curl "http://localhost:8080/api/content-versions?product=terraform-cdk&fullPath=doc%23cdktf/api-reference/python/classes"
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON object with a `versions` array. The array is empty if no versions contain the requested document.
+
+```json 200
+{
+  "versions": [
+    "v1.7.x",
+    "v1.8.x",
+    "v1.9.x"
+  ]
+}
+```
+
+```json 200 (no matching versions)
+{
+  "versions": []
+}
+```
+
+### Response fields
+
+<ResponseField name="versions" type="string[]" required>
+  Array of version strings where the requested document exists. Returns an empty array when no versions match — this mirrors the behavior of the existing content API.
+
+  Version strings follow one of two formats:
+  - Semver-style: `v1.9.x`
+  - Date-based (for Terraform Enterprise): `v20220610-01`
+</ResponseField>
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `400` | `Missing \`product\` query parameter...` | The `product` parameter was not provided. |
+| `400` | `Missing \`fullPath\` query parameter...` | The `fullPath` parameter was not provided. |
+| `404` | `Not found` | The `product` slug is not in the product configuration. |

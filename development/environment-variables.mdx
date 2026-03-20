@@ -1,0 +1,158 @@
+---
+title: Environment variables
+description: Reference for environment variables used in web-unified-docs for local development, Docker Compose, and Vercel preview environments.
+---
+
+## The .env file
+
+The repository includes a `.env` file at the root that provides default values for local development. Docker Compose and the local development server both read from this file automatically.
+
+```bash
+# .env
+UNIFIED_DOCS_PORT=8080
+DEV_PORTAL_PORT=3000
+PORT=${UNIFIED_DOCS_PORT}
+UNIFIED_DOCS_PROD_URL=https://web-unified-docs-hashicorp.vercel.app/
+INCREMENTAL_BUILD=false
+
+DEV_PORTAL_URL=http://localhost:${DEV_PORTAL_PORT}
+ALGOLIA_API_KEY=
+ALGOLIA_APP_ID=
+ALGOLIA_INDEX_NAME=
+```
+
+<Note>
+  The `.env` file in this repository is committed to version control and contains only non-sensitive defaults. Do not add secrets or credentials to this file.
+</Note>
+
+## Variable reference
+
+### Server ports
+
+<AccordionGroup>
+  <Accordion title="UNIFIED_DOCS_PORT">
+    **Default:** `8080`
+
+    The port on which the unified docs API listens. Used by Docker Compose to configure both the container's internal port and the host port mapping.
+
+    This variable is also aliased as `PORT` so that the Next.js server picks it up automatically.
+  </Accordion>
+
+  <Accordion title="DEV_PORTAL_PORT">
+    **Default:** `3000`
+
+    The port on which the dev-portal container listens and is exposed on the host.
+  </Accordion>
+
+  <Accordion title="PORT">
+    **Default:** `${UNIFIED_DOCS_PORT}` (8080)
+
+    Alias for `UNIFIED_DOCS_PORT`. The Next.js server reads `PORT` to determine which port to bind to.
+  </Accordion>
+</AccordionGroup>
+
+### API configuration
+
+<AccordionGroup>
+  <Accordion title="HASHI_ENV">
+    Controls which content API the dev-portal connects to for unified docs content.
+
+    | Value | Effect |
+    |-------|--------|
+    | `unified-docs-sandbox` | Points dev-portal to the local or preview unified docs API |
+
+    In Docker Compose, this is set to `unified-docs-sandbox` in the `dev-portal` service environment to direct dev-portal to use the local unified docs API instead of the production content API.
+
+    In Vercel preview environments, set this to `unified-docs-sandbox` to enable testing against a specific unified docs API deployment.
+  </Accordion>
+
+  <Accordion title="UNIFIED_DOCS_API">
+    **Used in:** Vercel preview environments, Docker Compose
+
+    The full URL of the unified docs API. In Docker Compose, this is set to `http://unified-docs-api:${UNIFIED_DOCS_PORT}` so the dev-portal container can reach the unified docs API over the internal Docker network.
+
+    In Vercel deploy previews for dev-portal branches, set this to the preview URL of the unified docs API deployment you want to test against.
+  </Accordion>
+
+  <Accordion title="MKTG_CONTENT_DOCS_API">
+    **Default (Docker Compose):** `https://content.hashicorp.com`
+
+    The URL of the existing HashiCorp content API. The dev-portal continues to use this for products that have not yet been migrated to web-unified-docs.
+  </Accordion>
+
+  <Accordion title="UNIFIED_DOCS_PROD_URL">
+    **Default:** `https://web-unified-docs-hashicorp.vercel.app/`
+
+    The production URL of the web-unified-docs deployment. Used for reference and for scripts that need to compare against the production API.
+  </Accordion>
+
+  <Accordion title="DEV_PORTAL_URL">
+    **Default:** `http://localhost:${DEV_PORTAL_PORT}`
+
+    The URL of the dev-portal instance. Passed to the unified-docs-api container in Docker Compose so the API can construct links back to the dev-portal when needed.
+  </Accordion>
+</AccordionGroup>
+
+### Build configuration
+
+<AccordionGroup>
+  <Accordion title="INCREMENTAL_BUILD">
+    **Default:** `false`
+
+    When set to `true`, the prebuild script runs in incremental mode. In this mode it calls `getChangedContentFiles()` to determine which content files have changed since the last build, and only processes those files rather than all content.
+
+    The prebuild script also automatically enables incremental mode when `VERCEL_ENV=production`.
+  </Accordion>
+
+  <Accordion title="VERCEL_ENV">
+    **Set by:** Vercel automatically
+
+    When `VERCEL_ENV=production`, the prebuild script sets `getRealFileChangedMetadata=true`, which enables accurate file-change tracking for incremental builds in production.
+  </Accordion>
+</AccordionGroup>
+
+### Algolia (optional)
+
+<AccordionGroup>
+  <Accordion title="ALGOLIA_API_KEY / ALGOLIA_APP_ID / ALGOLIA_INDEX_NAME">
+    **Default:** empty
+
+    Credentials for the Algolia search index. These are only required when running the Algolia index build step via `npm run prebuild -- --build-algolia-index`. Leave them empty for local development unless you are specifically working on search indexing.
+  </Accordion>
+</AccordionGroup>
+
+## Vercel preview environment setup
+
+When you need to test changes to both web-unified-docs and dev-portal simultaneously, configure custom environment variables on your dev-portal Vercel branch.
+
+<Steps>
+  <Step title="Deploy your web-unified-docs branch">
+    Push your web-unified-docs branch and get its Vercel preview URL. This will look something like `https://web-unified-docs-git-your-branch-hashicorp.vercel.app`.
+  </Step>
+
+  <Step title="Set environment variables on dev-portal">
+    Go to [Vercel → hashicorp/dev-portal → Settings → Environment Variables](https://vercel.com/hashicorp/dev-portal/settings/environment-variables) and set the following for your branch:
+
+    | Variable | Value |
+    |----------|-------|
+    | `HASHI_ENV` | `unified-docs-sandbox` |
+    | `UNIFIED_DOCS_API` | Your web-unified-docs preview URL |
+  </Step>
+
+  <Step title="Trigger a dev-portal preview build">
+    Push a commit to your dev-portal branch (or redeploy the preview). Vercel will use the environment variables you set to build a preview that fetches content from your web-unified-docs branch.
+  </Step>
+</Steps>
+
+<Tip>
+  You only need to set `UNIFIED_DOCS_API` when you want to point a dev-portal preview at a specific web-unified-docs preview. If you omit it, dev-portal will use its default unified docs API URL.
+</Tip>
+
+## Variables used in the prebuild process
+
+The prebuild script (`scripts/prebuild/prebuild.mjs`) uses the following environment variables at runtime:
+
+| Variable | Effect on prebuild |
+|----------|-------------------|
+| `INCREMENTAL_BUILD` | When `true`, only processes changed content files |
+| `VERCEL_ENV` | When `production`, enables real file-change metadata for incremental builds |

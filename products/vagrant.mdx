@@ -1,0 +1,98 @@
+---
+title: Vagrant
+description: Vagrant documentation in the web-unified-docs repository — development environment automation, versioned from v2.2.10 onward.
+---
+
+Vagrant documentation covers development environment creation and management, providers, boxes, the Vagrant CLI, and Vagrant Cloud. It is versioned and stored in `content/vagrant/`.
+
+<Note>
+Vagrant Community documentation is still published and maintained in this repository. **Waypoint Community Edition** is a separate product that is no longer actively maintained. HCP Waypoint documentation is hosted in the `hcp-docs` directory, not here.
+</Note>
+
+## Content directory
+
+```text
+content/vagrant/
+├── v2.2.10/
+├── v2.2.11/
+├── v2.2.12/
+├── v2.2.13/
+├── v2.2.14/
+├── v2.2.15/
+├── v2.2.16/
+├── v2.2.17/
+├── v2.2.18/
+├── v2.2.19/
+├── v2.3.0/
+├── v2.3.1/
+│   ... (patch versions through v2.3.7)
+├── v2.4.0/
+│   ... (patch versions through v2.4.9)
+```
+
+Vagrant version folders use **exact patch version numbers** (for example, `v2.4.9/`) rather than the `vMAJOR.MINOR.x` wildcard pattern used by most other products.
+
+Each version directory follows the standard structure:
+
+```text
+content/vagrant/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Vagrant content is served under four URL base paths:
+
+- `/docs/` — Vagrant conceptual and operational documentation
+- `/intro/` — Getting started with Vagrant
+- `/vagrant-cloud/` — Vagrant Cloud documentation
+- `/vmware/` — VMware provider documentation
+
+## Available versions
+
+Exact patch versions from `v2.2.10` through `v2.4.9` are present in the repository.
+
+<Warning>
+Older versions (v2.2.15 and earlier) may fail migration scripts with a "content directory not found" error, indicating a different source repository directory structure. Confirm before editing.
+</Warning>
+
+## Finding and editing Vagrant docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/vagrant/
+    ```
+
+    Note that Vagrant uses exact patch versions, so each patch release has its own directory.
+  </Step>
+  <Step title="Navigate to the content files">
+    Vagrant content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/vagrant/v2.4.9/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Match the URL base path (`docs/`, `intro/`, `vagrant-cloud/`, `vmware/`) to the correct subdirectory.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/vagrant/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `vagrant` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `docs`, `intro`, `vagrant-cloud`, `vmware` |
+| `versionedDocs` | `true` |

@@ -1,0 +1,135 @@
+---
+title: Local development setup
+description: Get a local preview of web-unified-docs running using Docker or npm scripts.
+---
+
+## Prerequisites
+
+Before you start, make sure you have the following tools installed:
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker">
+    Docker and Docker Compose are required to run the containerized local preview. This is the recommended path for most developers.
+  </Card>
+  <Card title="Node.js" icon="code">
+    Node.js 22 or later and npm are required if you want to run scripts directly outside of Docker.
+  </Card>
+  <Card title="Git" icon="git-branch">
+    Git is required to clone the repository and for the migration scripts to clone product source repositories.
+  </Card>
+  <Card title="Go (optional)" icon="code">
+    Go is only required if you need to run Packer documentation code generation via `make generate`.
+  </Card>
+</CardGroup>
+
+## Quick start with Docker
+
+The fastest way to get a working local preview is to use the `make` command. This starts the `unified-docs` Docker Compose profile, which spins up both the unified docs API and the dev-portal frontend.
+
+```bash
+make
+```
+
+Once both containers have finished starting up, you can access:
+
+| URL | Service |
+|-----|---------|
+| `http://localhost:3000` | Dev-portal — a local instance of the HashiCorp developer portal configured to pull from the unified docs API |
+| `http://localhost:8080` | Unified docs API — serves content from the `content/` directory |
+
+<Note>
+  The `unified-docs-api` container takes time to process all content and assets at startup. Wait for both containers to fully initialize before testing content in the dev-portal preview at `localhost:3000`.
+</Note>
+
+### Verify the API is ready
+
+Visit the following URL to confirm the unified docs API has finished processing content:
+
+```
+http://localhost:8080/api/all-docs-paths
+```
+
+This endpoint returns a list of all known documentation paths. If it responds successfully, the API is ready and the dev-portal can fetch content.
+
+You can also test a specific content endpoint:
+
+```
+http://localhost:8080/api/content/terraform-plugin-framework/doc/latest/plugin/framework
+```
+
+### Stopping the local preview
+
+<CodeGroup>
+
+```bash Stop containers
+make clean
+```
+
+```bash Stop containers and remove Docker images
+make clean CLEAN_OPTION=full
+```
+
+</CodeGroup>
+
+Run `make clean` in a separate terminal while the containers are running.
+
+## Granular control with npm scripts
+
+For more control over individual steps — for example, when iterating on prebuild scripts or running tests — you can use npm scripts directly instead of `make`.
+
+<Steps>
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+
+  <Step title="Run the prebuild script">
+    The prebuild step processes content from `content/` and writes transformed files into `public/content` and `public/assets`. It also generates `app/api/versionMetadata.json` and `app/api/docsPathsAllVersions.json`.
+
+    ```bash
+    npm run prebuild
+    ```
+  </Step>
+
+  <Step title="Start the development server">
+    ```bash
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Running tests
+
+```bash
+npm run coverage
+```
+
+This runs the full test suite with coverage reporting. Individual test files can be found alongside the scripts they test — for example, `scripts/prebuild/gather-version-metadata.test.ts`.
+
+## Available make commands
+
+| Command | Description |
+|---------|-------------|
+| `make` | Start the unified-docs Docker profile (equivalent to `make unified-docs`) |
+| `make clean` | Stop and remove project Docker containers and images, and delete `public/content` and `public/assets` |
+| `make clean CLEAN_OPTION=full` | Stop containers, remove images including `hashicorp/dev-portal`, and delete build output |
+| `make help` | List all available make targets |
+| `make generate` | Generate Packer plugin documentation (requires Go) |
+
+## What each service does
+
+**unified-docs-api (port 8080)**
+
+This is the unified docs API built from the local repository. On startup it runs the prebuild script, which:
+
+- Applies MDX transforms to files in `content/` and writes output to `public/content`
+- Copies assets to `public/assets`
+- Generates `app/api/versionMetadata.json`
+- Generates `app/api/docsPathsAllVersions.json`
+
+The API then serves this processed content over HTTP, implementing the same request and response shapes as the existing `content.hashicorp.com` API.
+
+**dev-portal (port 3000)**
+
+This is the HashiCorp developer portal (`hashicorp/dev-portal`), configured with `HASHI_ENV=unified-docs-sandbox` so it fetches documentation content from the local unified docs API instead of the production content API. It depends on the unified-docs-api container being healthy before it starts.

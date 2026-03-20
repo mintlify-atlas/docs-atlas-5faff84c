@@ -1,0 +1,114 @@
+---
+title: "Contributing overview"
+description: "How to contribute documentation changes to the HashiCorp unified docs repository."
+---
+
+Contributions to `hashicorp/web-unified-docs` are welcome from both the community and HashiCorp employees. This page explains who can contribute, what you can contribute, and how the pull request process works.
+
+## Who can contribute
+
+The repository is public. Anyone can open a pull request with documentation improvements.
+
+<CardGroup cols={2}>
+  <Card title="Community contributors" icon="users">
+    Open issues and pull requests like any normal GitHub project. Typo fixes, clarifications, and content improvements are all welcome.
+  </Card>
+  <Card title="HashiCorp employees" icon="building">
+    Internal employees follow the same workflow. For embargoed content (unreleased products or announcements), use the private `web-unified-docs-internal` repository instead.
+  </Card>
+</CardGroup>
+
+## What you can contribute
+
+- **Content edits** — fix typos, improve explanations, update outdated information
+- **New pages** — add documentation for new features or topics (see the [content guide](/content-guides/create-new-page))
+- **Navigation updates** — add new pages to a product's sidebar
+- **Redirects** — add redirect rules when moving or renaming pages (see the [redirects guide](/content-guides/redirects))
+
+<Note>
+  Files are only rendered and published if they are listed in the product's sidebar navigation data. A new MDX file that is not added to the navigation will not appear on developer.hashicorp.com.
+</Note>
+
+## How to submit a pull request
+
+<Steps>
+  <Step title="Clone the repository">
+    For contributions to published content, clone only the `main` branch:
+
+    ```shell-session
+    git clone --single-branch git@github.com:hashicorp/web-unified-docs.git
+    ```
+
+    For contributions to an upcoming release, clone the release branch instead. See your product's tech writer team for the branch name.
+  </Step>
+
+  <Step title="Create a working branch">
+    Follow the [branch naming conventions](/contributing/branch-naming) for your branch name:
+
+    ```shell-session
+    git checkout -b <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Make your changes">
+    Edit the MDX files in the relevant product directory under `content/`. If the product uses version folders, edit the correct version subdirectory.
+
+    Refer to [repository structure](/contributing/repository-structure) to find the right place to make your changes.
+  </Step>
+
+  <Step title="Preview locally (optional)">
+    Run `make` from the root of the repository to start a local preview. See the [quickstart](/quickstart) for full instructions.
+  </Step>
+
+  <Step title="Commit and push">
+    ```shell-session
+    git commit -a -m "<short description of the changes>"
+    git push origin <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Open a pull request">
+    Open a PR against `main` (or the release branch, for upcoming release work). Pull requests are automatically labeled and assigned to the relevant product documentation team for review.
+
+    A technical writer will review your PR and provide feedback. After incorporating their feedback and receiving approval, merge the PR.
+  </Step>
+</Steps>
+
+<Note>
+  Content changes appear on developer.hashicorp.com approximately 10 minutes after merging to `main`.
+</Note>
+
+## PR preview environments
+
+When you open a pull request, Vercel automatically builds a preview deployment of the full documentation site. To access it:
+
+1. Find the **Vercel Previews Deployed** comment on your PR.
+2. Click **Visit Preview** to see your changes rendered in the full dev-portal environment.
+
+Preview environments reflect the full state of the repository including all product docs — not just the files you changed.
+
+## Broken link checking
+
+When a PR modifies content, an automated broken link check runs and posts its results as a PR comment. This check is **informational only** — broken links do not block your PR from merging.
+
+Prioritization guidance for broken links:
+
+| Priority | Link type | Recommended action |
+|---|---|---|
+| High | Internal HashiCorp links (to developer.hashicorp.com) | Fix before merging |
+| Medium | External documentation and API links | Review and fix if possible |
+| Low | Unreliable external links | Consider removing or replacing |
+
+Production broken link monitoring runs on a weekly schedule and creates GitHub issues for user-facing broken links. See the [broken link monitoring guide](/content-guides/broken-link-monitoring) for details.
+
+## Product-specific contributing guides
+
+Each product directory contains a `README` with product-specific contribution guidance — covering things like version management, content structure, and any special conventions for that product.
+
+Find the README for your product at:
+
+```text
+content/<product-name>/README.md
+```
+
+For example, `content/vault/README.md` for Vault.

@@ -1,0 +1,133 @@
+---
+title: Nav data
+description: Fetch the navigation tree for a product documentation section, used to render the sidebar in dev-portal.
+---
+
+## Endpoint
+
+```
+GET /api/content/:productSlug/nav-data/:version/:section
+```
+
+Fetches the navigation tree for a specific section of a product's documentation. dev-portal uses this to build the sidebar menu shown alongside documentation pages.
+
+The route resolves to a `<section>-nav-data.json` file in the product's versioned content directory under `data/`.
+
+## Path parameters
+
+<ParamField path="productSlug" type="string" required>
+  The slug identifying the product.
+
+  Examples: `terraform-plugin-framework`, `terraform-enterprise`
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  The documentation version. Use `latest` to resolve to the most recent stable version.
+
+  Examples: `latest`, `v1.9.x`
+</ParamField>
+
+<ParamField path="section" type="string" required>
+  The section name corresponding to a nav data file. The server looks up `content/<productSlug>/<version>/data/<section>-nav-data.json`.
+
+  Examples: `docs`, `cli`, `plugin`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Fetch docs sidebar for latest
+curl http://localhost:8080/api/content/terraform-plugin-framework/nav-data/latest/docs
+```
+
+```bash Fetch CLI sidebar for a specific version
+curl http://localhost:8080/api/content/terraform-enterprise/nav-data/v1.9.x/cli
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON object with a `result` containing the `navData` array. Each element is a nav item that may have nested children.
+
+```json 200
+{
+  "result": {
+    "navData": [
+      {
+        "title": "Overview",
+        "path": "plugin/framework"
+      },
+      {
+        "title": "Getting Started",
+        "routes": [
+          {
+            "title": "Code Walkthrough",
+            "path": "plugin/framework/getting-started/code-walkthrough"
+          }
+        ]
+      },
+      {
+        "divider": true
+      }
+    ]
+  }
+}
+```
+
+### Response fields
+
+<ResponseField name="result" type="object" required>
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="navData" type="object[]">
+      Array of navigation items. Items can be leaf nodes, category nodes with nested routes, or dividers.
+      <Expandable title="nav item properties">
+        <ResponseField name="title" type="string">
+          Display label for the nav item. Present on leaf nodes and category nodes.
+        </ResponseField>
+        <ResponseField name="path" type="string">
+          URL path for the page. Present on leaf nodes only.
+        </ResponseField>
+        <ResponseField name="routes" type="object[]">
+          Nested child nav items. Present on category nodes. Follows the same shape recursively.
+        </ResponseField>
+        <ResponseField name="divider" type="boolean">
+          When `true`, renders a visual separator. The item has no `title` or `path`.
+        </ResponseField>
+        <ResponseField name="heading" type="string">
+          Optional section heading rendered above the group.
+        </ResponseField>
+        <ResponseField name="hidden" type="boolean">
+          When `true`, the item is excluded from rendered navigation.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Response headers
+
+| Header | Description |
+|--------|-------------|
+| `content-type` | Always `application/json` |
+| `served-from` | Indicates whether content was served from `current build` or `production` |
+
+## How nav data files are structured
+
+Nav data files live at `content/<productSlug>/<version>/data/<section>-nav-data.json` in the repository. They are plain JSON arrays following the nav item schema described above.
+
+```
+content/
+  terraform-plugin-framework/
+    v1.10.x/
+      data/
+        docs-nav-data.json
+        plugin-nav-data.json
+```
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | The `productSlug` or `version` could not be resolved, or no nav data file exists for the requested `section`. |

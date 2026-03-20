@@ -1,0 +1,103 @@
+---
+title: Products overview
+description: All HashiCorp products hosted in the web-unified-docs repository, with links to per-product documentation pages.
+---
+
+The `hashicorp/web-unified-docs` repository is a single monorepo that hosts documentation for every HashiCorp product published on [developer.hashicorp.com](https://developer.hashicorp.com). Content lives under `content/<product>/` and is served through a unified API.
+
+## All products
+
+The table below lists every product directory in this repository, its content path, and whether it uses directory-based version folders.
+
+| Product | Directory | Versioned? |
+| :------ | :-------- | :--------: |
+| Boundary | `content/boundary/` | Yes |
+| Consul | `content/consul/` | Yes |
+| HCP (all HCP products) | `content/hcp-docs/` | No |
+| HCP Vault Dedicated | `content/hcp-docs/` | No |
+| HCP Vault Secrets | `content/hcp-docs/` | No |
+| HCP Packer | `content/hcp-docs/` | No |
+| HCP Waypoint | `content/hcp-docs/` | No |
+| Nomad | `content/nomad/` | Yes |
+| Packer | `content/packer/` | Yes |
+| Sentinel | `content/sentinel/` | Yes |
+| Terraform | `content/terraform/` | Yes |
+| Terraform CDK | `content/terraform-cdk/` | Yes |
+| HCP Terraform agents | `content/terraform-docs-agents/` | Yes |
+| Terraform (cloud docs common) | `content/terraform-docs-common/` | No |
+| Terraform Enterprise | `content/terraform-enterprise/` | Yes |
+| Terraform MCP Server | `content/terraform-mcp-server/` | Yes |
+| Terraform Migrate | `content/terraform-migrate/` | Yes |
+| Terraform Plugin Framework | `content/terraform-plugin-framework/` | Yes |
+| Terraform Plugin Log | `content/terraform-plugin-log/` | Yes |
+| Terraform Plugin Mux | `content/terraform-plugin-mux/` | Yes |
+| Terraform Plugin SDK | `content/terraform-plugin-sdk/` | Yes |
+| Terraform Plugin Testing | `content/terraform-plugin-testing/` | Yes |
+| Vagrant | `content/vagrant/` | Yes |
+| Vault | `content/vault/` | Yes |
+| Well-Architected Framework | `content/well-architected-framework/` | No |
+
+## Versioned vs. unversioned products
+
+Most products use **versioned content**: the `content/<product>/` directory contains one sub-directory per supported release (for example, `content/terraform/v1.11.x/`). When you edit documentation for a specific release, you work inside that version folder.
+
+A smaller set of products are **unversioned**: their `content/<product>/` directory holds content directly without version sub-directories. These products publish a single version tracked on `main`.
+
+Unversioned products in this repository:
+
+- `content/hcp-docs/` — all HCP product documentation
+- `content/terraform-docs-common/` — shared Terraform cloud documentation
+- `content/well-architected-framework/` — Well-Architected Framework
+
+## Product pages
+
+<CardGroup cols={2}>
+  <Card title="Terraform" icon="layer-group" href="/products/terraform">
+    Core Terraform, CDK, MCP Server, Migrate, and shared cloud docs.
+  </Card>
+  <Card title="Vault" icon="lock" href="/products/vault">
+    Secrets management documentation, versioned from v1.4.x onward.
+  </Card>
+  <Card title="Consul" icon="network-wired" href="/products/consul">
+    Service networking documentation, versioned from v1.8.x onward.
+  </Card>
+  <Card title="Nomad" icon="server" href="/products/nomad">
+    Workload orchestration documentation, versioned from v0.11.x onward.
+  </Card>
+  <Card title="Boundary" icon="shield" href="/products/boundary">
+    Identity-based access documentation, versioned from v0.1.x onward.
+  </Card>
+  <Card title="Packer" icon="box" href="/products/packer">
+    Machine image automation documentation, versioned from v1.5.x onward.
+  </Card>
+  <Card title="Sentinel" icon="gavel" href="/products/sentinel">
+    Policy-as-code documentation, versioned from v0.13.x onward.
+  </Card>
+  <Card title="Vagrant" icon="cube" href="/products/vagrant">
+    Development environment documentation, versioned from v2.2.10 onward.
+  </Card>
+  <Card title="HCP" icon="cloud" href="/products/hcp-docs">
+    HashiCorp Cloud Platform documentation: HCP Vault Dedicated, HCP Vault Secrets, HCP Packer, HCP Waypoint.
+  </Card>
+  <Card title="Terraform Enterprise" icon="building" href="/products/terraform-enterprise">
+    Self-managed Terraform Enterprise documentation.
+  </Card>
+  <Card title="Well-Architected Framework" icon="book-open" href="/products/well-architected-framework">
+    Architectural guidance for HashiCorp products.
+  </Card>
+  <Card title="Terraform Plugin Framework" icon="puzzle-piece" href="/products/terraform-plugin-framework">
+    Documentation for building Terraform providers with the Plugin Framework.
+  </Card>
+  <Card title="Terraform Plugin SDK" icon="wrench" href="/products/terraform-plugin-sdk">
+    Documentation for building Terraform providers with the Plugin SDK v2.
+  </Card>
+  <Card title="Terraform Plugin Testing" icon="flask" href="/products/terraform-plugin-testing">
+    Testing library documentation for Terraform plugin developers.
+  </Card>
+  <Card title="Terraform Plugin Log" icon="file-text" href="/products/terraform-plugin-log">
+    Structured logging library documentation for Terraform plugin developers.
+  </Card>
+  <Card title="Terraform Plugin Mux" icon="code-branch" href="/products/terraform-plugin-mux">
+    Protocol multiplexing library documentation for Terraform plugin developers.
+  </Card>
+</CardGroup>

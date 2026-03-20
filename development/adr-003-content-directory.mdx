@@ -1,0 +1,66 @@
+---
+title: "ADR 003: Content outside the public directory"
+description: The decision to author MDX content in content/ rather than public/, separating source files from build output.
+---
+
+<Info>
+  **Status:** Accepted
+</Info>
+
+## Context
+
+In the initial prototype of web-unified-docs, `.mdx` content files were located directly in the `public/` directory.
+
+This decision followed [ADR 002](/development/adr-002-mdx-transforms), which established that MDX transforms should be applied during the prebuild script. With transforms running at build time, the files in the repository (the source files) are different from the files that should be served (the transformed files). Storing source files in `public/` implies they are the files being served — which is no longer true.
+
+This created a workflow problem. With source files already in `public/`, applying transforms in place would modify tracked files, disrupting local authoring workflows where changes are tracked in git. The alternatives were unintuitive:
+
+- Modify files in place for deploy preview and production, but skip this for local development — creating environment-specific behavior
+- Copy files to a subdirectory of `public/` before transforming — but then both raw and transformed content would be publicly accessible
+
+## Decision
+
+Authored `.mdx` content lives in a `content/` directory at the root of the repository.
+
+When the prebuild script runs MDX transforms, it reads from `content/` and writes transformed output to `public/content/`. The `public/content/` output directory mirrors the structure of `content/` and is excluded from version control.
+
+**Directory structure:**
+
+```
+web-unified-docs/
+├── content/              # Source MDX files — version controlled
+│   └── terraform/
+│       └── v1.10.x/
+│           ├── docs/
+│           │   └── index.mdx
+│           └── data/
+│               └── docs-nav-data.json
+├── public/
+│   ├── content/          # Transformed output — NOT version controlled
+│   └── assets/           # Processed assets — NOT version controlled
+└── ...
+```
+
+### What is not decided here
+
+**The internal structure of `content/` is not finalized by this ADR.** The directory structure within `content/` was inherited from the prototype and should not be interpreted as a deliberate or permanent design. A separate decision will be needed on how to organize `content/` and that decision will be made in collaboration with content authors.
+
+**The location of images and other assets is not decided here.** At the time this ADR was written, there was no clear need to process images before serving them, so images remained in `public/assets/`. A separate decision will be needed on how to organize versioned images and assets.
+
+## Consequences
+
+**Positive consequences:**
+
+- A consistent and intuitive MDX transformation workflow works the same way across local development, deploy preview, and production builds. There is no environment-specific behavior.
+- Content authors have a clearly marked and isolated directory (`content/`) where `.mdx` source files should be written. The `public/content/` directory is clearly build output.
+- The separation between source and output makes it easy to reason about what is tracked in git versus what is generated.
+- The prebuild script can safely write transformed files to `public/content/` without touching version-controlled source files, even during local development.
+
+**Negative consequences:**
+
+- Original authored MDX files are no longer accessible through the Vercel CDN. This is not a problem in practice — dev-portal needs transformed content, not raw authored source. But it is a change from the prototype behavior.
+
+**Neutral consequences:**
+
+- The `public/content/` and `public/assets/` directories must be regenerated whenever the prebuild runs. They are listed in `.gitignore` and in the `make clean` command, which removes these directories when stopping the local preview.
+- Assets (images and other binary files) are handled separately from MDX content. The current approach copies assets from `content/<product>/<version>/img/` to `public/assets/<product>/<version>/` during the prebuild. The long-term approach to shared versus versioned assets is a separate open question.

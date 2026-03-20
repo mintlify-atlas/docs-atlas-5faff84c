@@ -1,0 +1,168 @@
+---
+title: Navigation Sidebars
+description: How navigation sidebars work in HashiCorp Web Unified Docs, including the nav-data.json format, how to add pages, how sidebar data is served through the API, and how to create nested navigation entries.
+---
+
+The structure of the documentation sidebar is controlled by JSON files in the `./content/<product>/<version>/data` directory. Each file configures navigation for a specific section of a product's documentation.
+
+For example, `docs-nav-data.json` controls the navigation for the product's `Documentation` section on developer.hashicorp.com.
+
+<Warning>
+Files and directories only render and publish to the website if they are listed in a nav-data file. Any `.mdx` file not included in sidebar data will **not** be rendered or published, regardless of whether it exists in the filesystem.
+</Warning>
+
+## Nav-data file location
+
+Sidebar files are in the `content/<product>/<version>/data` directory. Any file in this directory whose name ends in `-nav-data` controls navigation for the given section.
+
+| File name | Controls navigation for |
+| :--- | :--- |
+| `docs-nav-data.json` | The `docs` section |
+| `api-docs-nav-data.json` | The API docs section |
+| `cli-nav-data.json` | The CLI reference section |
+
+For example, `web-unified-docs/content/vault/v1.20.x/data/docs-nav-data.json` controls the Vault docs v1.20.x sidebar.
+
+## Nav-data file format
+
+The nav-data file is a JSON array of node objects. Each node is either a **directory node** (has `routes`) or a **leaf node** (has `path`).
+
+```json
+[
+  {
+    "title": "Directory",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "directory"
+      },
+      {
+        "title": "File",
+        "path": "directory/file"
+      },
+      {
+        "title": "Another File",
+        "path": "directory/another-file"
+      },
+      {
+        "title": "Nested Directory",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "directory/nested-directory"
+          },
+          {
+            "title": "Nested File",
+            "path": "directory/nested-directory/nested-file"
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+This corresponds to the following filesystem layout:
+
+```text
+.
+├── docs
+│   └── directory
+│       ├── index.mdx
+│       ├── file.mdx
+│       ├── another-file.mdx
+│       └── nested-directory
+│           ├── index.mdx
+│           └── nested-file.mdx
+```
+
+## Node properties
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `title` | string | Human-readable label shown in the navigation sidebar. |
+| `path` | string | URL path where the `.mdx` document renders. Used on leaf nodes only. |
+| `routes` | array | Child nodes for this directory entry. Presence of `routes` makes this a directory node. |
+| `href` | string | An explicit URL (internal or external) instead of a `path` reference. |
+
+## Rules and conventions
+
+- **Ordering is flexible, but hierarchy is not.** You can reorder sibling entries in any order, or omit entries entirely, but you cannot un-nest a directory node without also un-nesting it in the filesystem.
+- **`index.mdx` files** must be explicitly listed in the nav-data. The path resolves from the directory name: use `"path": "directory"` rather than `"path": "directory/index"`.
+- A common convention is to set the `title` of an index node to `"Overview"`.
+- An `index.mdx` file is **not required** for every subdirectory.
+
+## Adding a new page to the sidebar
+
+After creating a new `.mdx` file, add an entry to the corresponding nav-data file in the `data` directory.
+
+<Steps>
+  <Step title="Identify the correct nav-data file">
+    Navigate to `content/<product>/<version>/data/` and open the file that matches your section (for example, `docs-nav-data.json` for content under `docs/`).
+  </Step>
+  <Step title="Find the parent section">
+    Locate the `routes` array for the directory that contains your new file.
+  </Step>
+  <Step title="Add a leaf node">
+    Add a new object with `title` and `path` properties:
+
+    ```json
+    {
+      "title": "My New Page",
+      "path": "concepts/my-new-page"
+    }
+    ```
+
+    The `path` value must match the file path relative to the `docs` directory, without the `.mdx` extension.
+  </Step>
+</Steps>
+
+## Nested navigation entries
+
+To add a new subdirectory to the navigation, create a directory node with a `routes` array. The node must correspond to an actual subdirectory in the filesystem.
+
+```json
+{
+  "title": "New Section",
+  "routes": [
+    {
+      "title": "Overview",
+      "path": "new-section"
+    },
+    {
+      "title": "First Page",
+      "path": "new-section/first-page"
+    }
+  ]
+}
+```
+
+## Custom and external links
+
+Use the `href` property instead of `path` to include links that point outside the docs file hierarchy:
+
+```json
+[
+  {
+    "name": "Directory",
+    "routes": [
+      {
+        "title": "File",
+        "path": "directory/file"
+      },
+      {
+        "title": "Tao of HashiCorp",
+        "href": "https://www.hashicorp.com/tao-of-hashicorp"
+      }
+    ]
+  }
+]
+```
+
+External `href` links display a small external link icon in the sidebar. Internal `href` links appear the same as regular file links.
+
+## How sidebar data is served
+
+The nav-data JSON is read by the `web-unified-docs` API and served to the `dev-portal` front end, which renders the sidebar. Changes merged to `main` appear on developer.hashicorp.com typically within 30 minutes.
+
+For versioned products, the API serves the nav-data from the version folder matching the version the user has selected in the version picker.

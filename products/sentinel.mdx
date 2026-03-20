@@ -1,0 +1,94 @@
+---
+title: Sentinel
+description: Sentinel documentation in the web-unified-docs repository — policy-as-code, versioned from v0.13.x onward.
+---
+
+Sentinel documentation covers the Sentinel policy language, framework, runtime, and integration with HashiCorp products. It is versioned and stored in `content/sentinel/`.
+
+## Content directory
+
+```text
+content/sentinel/
+├── global/           # Shared assets used across versions
+├── v0.13.x/
+├── v0.14.x/
+├── v0.15.x/
+├── v0.16.x/
+├── v0.17.x/
+├── v0.18.x/
+├── v0.19.x/
+├── v0.20.x/
+├── v0.21.x/
+├── v0.22.x/
+├── v0.23.x/
+├── v0.24.x/
+├── v0.25.x/
+├── v0.26.x/
+├── v0.27.x/
+├── v0.28.x/
+├── v0.29.x/
+├── v0.30.x/
+└── v0.40.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/sentinel/<version>/
+├── content/sentinel/   # Markdown content files (note the nested sentinel/ path)
+├── data/               # Navigation sidebar JSON files
+└── public/images/      # Image assets
+```
+
+## URL base paths
+
+Sentinel content is served under the `/sentinel/` URL base path.
+
+## Available versions
+
+Versions `v0.13.x` through `v0.40.x` are present in the repository. The `global/` directory contains content shared across all versions.
+
+## Content directory structure note
+
+Sentinel uses an unusual `contentDir` configuration. In the source repository, content lives at `website/content/sentinel` rather than just `website/content`. This means the content path within the versioned folder includes a nested `sentinel/` subdirectory.
+
+<Warning>
+Older Sentinel versions (v0.16.x and earlier) used a `pages/` directory instead of `content/` to store documentation files. Migration scripts must account for this difference. Do not assume the standard `content/` structure applies when working with older Sentinel versions.
+</Warning>
+
+## Finding and editing Sentinel docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/sentinel/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Sentinel content files are in a nested path within each version folder:
+
+    ```shell-session
+    ls content/sentinel/v0.40.x/content/sentinel/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. All Sentinel documentation is served under `/sentinel/`, so paths correspond to that base.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/sentinel/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `sentinel` |
+| `contentDir` | `content/sentinel` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/images` |
+| `basePaths` | `sentinel` |
+| `versionedDocs` | `true` |

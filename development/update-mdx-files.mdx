@@ -1,0 +1,129 @@
+---
+title: Update MDX files script
+description: Add a contributor notice to MDX files in the original product repository pointing contributors to web-unified-docs.
+---
+
+After a product's documentation has been migrated to web-unified-docs, contributors should no longer make changes to the `.mdx` files in the original product repository's `/website` directory. The `update-mdx-files.sh` script automates the process of adding a prominent notice to those files.
+
+## Purpose
+
+The script inserts a standardized notice block into every `.mdx` file in a specified directory. The notice informs contributors that:
+
+- Documentation has moved to `hashicorp/web-unified-docs`
+- Changes made in the original `/website` directory will not appear on `developer.hashicorp.com`
+- Future contributions should be made directly in web-unified-docs
+
+The notice is inserted immediately after the closing `---` of each file's YAML frontmatter, so it appears prominently at the top of the file content in any editor.
+
+## Usage
+
+```bash
+./scripts/update-mdx-files.sh /path/to/product/website/docs
+```
+
+**Example for terraform-plugin-framework:**
+
+```bash
+./scripts/update-mdx-files.sh ~/Desktop/hashicorp/terraform-plugin-framework/website/docs
+```
+
+The script takes a single argument: the path to the directory containing `.mdx` files. It recursively processes all `.mdx` files found within that directory.
+
+## What the script does
+
+<Steps>
+  <Step title="Validates the input">
+    The script checks that a directory path was provided and that the path exists. If either check fails, it exits with an error message.
+  </Step>
+
+  <Step title="Creates the notice text">
+    A temporary file containing the notice block is created:
+
+    ```markdown
+    ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+    > [!IMPORTANT]  
+    > **Documentation Update:** Product documentation previously located in `/website` has moved to the [`hashicorp/web-unified-docs`](https://github.com/hashicorp/web-unified-docs) repository, where all product documentation is now centralized. Please make contributions directly to `web-unified-docs`, since changes to `/website` in this repository will not appear on developer.hashicorp.com.
+    ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+    ```
+  </Step>
+
+  <Step title="Processes each MDX file">
+    For each `.mdx` file found recursively in the target directory, the script:
+
+    1. Checks whether the file has YAML frontmatter (delimited by `---`)
+    2. Finds the line number of the second `---` marker (the closing delimiter)
+    3. Inserts the notice block immediately after that closing `---`
+    4. Overwrites the original file with the updated content
+
+    Files without frontmatter are counted but not modified.
+  </Step>
+
+  <Step title="Reports progress">
+    The script displays live-updating counters in the terminal as files are processed.
+  </Step>
+</Steps>
+
+## Example output
+
+```
+Progress:
+
+Files processed: 135
+Files updated: 135
+Files with no frontmatter: 0
+Files with errors: 0
+
+Completed! All MDX files have been processed.
+```
+
+## Example file before and after
+
+<Tabs>
+  <Tab title="Before">
+    ```mdx
+    ---
+    title: Getting started
+    description: Introduction to My Product.
+    ---
+
+    Welcome to My Product.
+    ```
+  </Tab>
+
+  <Tab title="After">
+    ```mdx
+    ---
+    title: Getting started
+    description: Introduction to My Product.
+    ---
+
+    ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+    > [!IMPORTANT]  
+    > **Documentation Update:** Product documentation previously located in `/website` has moved to the [`hashicorp/web-unified-docs`](https://github.com/hashicorp/web-unified-docs) repository, where all product documentation is now centralized. Please make contributions directly to `web-unified-docs`, since changes to `/website` in this repository will not appear on developer.hashicorp.com.
+    ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
+    Welcome to My Product.
+    ```
+  </Tab>
+</Tabs>
+
+## When to run this script
+
+Run this script **after** the migration PR for a product has been merged into web-unified-docs. The sequence is:
+
+1. Migrate the product's documentation into web-unified-docs
+2. Merge the migration PR
+3. Run `update-mdx-files.sh` against the original product repository
+4. Open a PR to the product repository with the updated files
+5. Merge the PR to the product repository
+
+Running the script before the migration PR is merged could confuse contributors who try to make changes in the product repo before the new home for the docs is actually live.
+
+## Error handling
+
+| Condition | Behavior |
+|-----------|----------|
+| File has frontmatter and is updated successfully | Counted in "Files updated" |
+| File has no frontmatter | Counted in "Files with no frontmatter", not modified |
+| File could not be written | Error printed, counted in "Files with errors" |
+| Second frontmatter marker not found | Error printed, counted in "Files with errors" |

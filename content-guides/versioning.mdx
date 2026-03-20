@@ -1,0 +1,119 @@
+---
+title: Versioned Documentation
+description: How versioned documentation works in HashiCorp Web Unified Docs, including directory-based versioning, version naming conventions, latest vs. pinned versions, and how the version metadata API works.
+---
+
+Some HashiCorp products maintain documentation for multiple released versions simultaneously. This guide explains how versioning is implemented in `web-unified-docs` and how the system serves the right content to users.
+
+## Which products are versioned
+
+The following table lists whether each product in the repository uses versioned content directories.
+
+| Product | Directory | Versioned |
+| :--- | :--- | :---: |
+| Boundary | `./content/boundary` | Yes |
+| Consul | `./content/consul` | Yes |
+| HCP | `./content/hcp-docs` | No |
+| Nomad | `./content/nomad` | Yes |
+| Sentinel | `./content/sentinel` | Yes |
+| Terraform | `./content/terraform` | Yes |
+| Terraform CDK | `./content/terraform-cdk` | Yes |
+| HCP Terraform agents | `./content/terraform-docs-agents` | Yes |
+| Terraform Enterprise | `./content/terraform-enterprise` | Yes |
+| Terraform Plugin Framework | `./content/terraform-plugin-framework` | Yes |
+| Terraform Plugin SDK | `./content/terraform-sdk` | Yes |
+| Vault | `./content/vault` | Yes |
+| Well-architected framework | `./content/well-architected-framework` | No |
+
+## Directory-based versioning
+
+For versioned products, the `content/<product>` directory contains one subdirectory per supported version. All documentation, navigation data, and redirects for that version live inside the version folder.
+
+```text
+content/
+└── vault/
+    ├── v1.18.x/
+    │   ├── docs/
+    │   ├── data/
+    │   └── redirects.jsonc
+    ├── v1.19.x/
+    │   ├── docs/
+    │   ├── data/
+    │   └── redirects.jsonc
+    └── v1.20.x/
+        ├── docs/
+        ├── data/
+        └── redirects.jsonc
+```
+
+## Version naming conventions
+
+Version directories use semantic versioning with a patch wildcard:
+
+```text
+v<MAJOR>.<MINOR>.x
+```
+
+For example: `v1.20.x`, `v2.0.x`.
+
+The `.x` suffix indicates that the folder covers all patch releases for that minor version (e.g., `v1.20.0`, `v1.20.1`, `v1.20.2`).
+
+<Note>
+Vault uses a date-based format for release branches (`vault/YYYYMM`), but the content directory naming still follows the `vX.Y.x` convention.
+</Note>
+
+## Latest version vs. pinned versions
+
+The **latest version** is the most recently released version of a product. Its documentation is served at the unversioned URL:
+
+```text
+https://developer.hashicorp.com/<product>/docs/<path>
+```
+
+**Pinned versions** are served at URLs that include the version segment:
+
+```text
+https://developer.hashicorp.com/<product>/docs/v1.19.x/<path>
+```
+
+The version picker on developer.hashicorp.com lets users switch between available versions. The `web-unified-docs` API determines which version folder maps to the "latest" label.
+
+<Info>
+When editing published documentation for the current or a previous release, make your updates in the corresponding version folder. If you need to update multiple versions, update each version folder separately.
+</Info>
+
+## Version metadata API
+
+The `web-unified-docs` API exposes version metadata to the `dev-portal` front end, which uses it to populate the version picker. The API reads the list of available version directories for each product and returns them as ordered version metadata.
+
+The `productConfig.mjs` file in the repository root configures how each product's versions are discovered and sorted:
+
+```mjs
+'vault': {
+  assetDir: 'img',
+  basePaths: ['docs', 'api-docs'],
+  contentDir: 'docs',
+  dataDir: 'data',
+  productSlug: 'vault',
+  semverCoerce: semver.coerce,
+  versionedDocs: true,
+  websiteDir: 'website',
+},
+```
+
+The `semverCoerce` function normalizes version strings so that the API can sort versions correctly even when directory names use the `vX.Y.x` patch-wildcard format.
+
+## Difference from the old branch/tag approach
+
+Prior to `web-unified-docs`, many HashiCorp products maintained versioned documentation in separate Git branches or tags within their product repositories. Each version lived on a branch like `stable-website` or a tag like `v1.19.0`.
+
+The unified approach replaces this with **directory-based versioning** in a single repository:
+
+| Old approach | New approach |
+| :--- | :--- |
+| One Git branch per version | One directory per version in `content/<product>/` |
+| Versioned content spread across multiple repos | All versioned content in `web-unified-docs` |
+| Branch-level redirects | Per-docset `redirects.jsonc` files |
+| Version metadata from Git tags | Version metadata from directory names via `productConfig.mjs` |
+
+This consolidation makes it possible to make cross-version edits in a single pull request and simplifies the review and publishing workflow.

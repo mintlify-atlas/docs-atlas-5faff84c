@@ -1,0 +1,118 @@
+---
+title: Docker Compose setup
+description: Overview of the Docker Compose configuration used to run a local preview of web-unified-docs and dev-portal.
+---
+
+The `docker-compose.yaml` file at the root of the repository defines the services used for local development. Two containers run together under the `unified-docs` Docker Compose profile.
+
+## The unified-docs profile
+
+Services are grouped under the `unified-docs` profile. This profile is activated when you run `make` or pass `--profile unified-docs` to `docker compose` directly.
+
+```bash
+# Using make (recommended)
+make
+
+# Or directly with docker compose
+docker compose --profile unified-docs up
+```
+
+Only services that declare `profiles: [unified-docs]` are started when using this profile.
+
+## Services
+
+### unified-docs-api
+
+This container builds the unified docs API from the local `Dockerfile`. It exposes the API on port `8080` and mounts the local `content/` directory into the container so changes to content are reflected without rebuilding the image.
+
+```yaml
+unified-docs-api:
+  build: .
+  container_name: unified-docs-api
+  ports:
+    - ${UNIFIED_DOCS_PORT}:${UNIFIED_DOCS_PORT}
+  environment:
+    - DEV_PORTAL_URL=http://dev-portal:${DEV_PORTAL_PORT}
+  volumes:
+    - ./content:/server/content
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:${UNIFIED_DOCS_PORT}"]
+    interval: 90s
+    timeout: 10s
+    retries: 5
+    start_period: 120s
+```
+
+**Startup sequence**
+
+When the container starts, it runs the prebuild script, which:
+
+1. Reads MDX content from `/server/content` (mapped from `./content` on the host)
+2. Applies MDX transforms and writes processed files to `public/content`
+3. Copies assets to `public/assets`
+4. Generates `app/api/versionMetadata.json` from versioned content directories
+5. Generates `app/api/docsPathsAllVersions.json` with all known documentation paths
+
+The healthcheck polls `http://localhost:8080` every 90 seconds and allows up to 120 seconds for the container to start before beginning health checks. The `dev-portal` container waits for this healthcheck to pass before it starts.
+
+<Note>
+  Content processing takes a significant amount of time on first startup because the prebuild script must process all MDX files, copy assets, and generate index files. Expect to wait several minutes before the API is fully ready.
+</Note>
+
+### dev-portal
+
+This container runs the `hashicorp/dev-portal:latest` image — the HashiCorp developer portal frontend. It connects to the local unified docs API and exposes the portal on port `3000`.
+
+```yaml
+dev-portal:
+  image: 'hashicorp/dev-portal:latest'
+  container_name: dev-portal
+  ports:
+    - ${DEV_PORTAL_PORT}:${DEV_PORTAL_PORT}
+  depends_on:
+    unified-docs-api:
+      condition: service_healthy
+  environment:
+    - MKTG_CONTENT_DOCS_API=https://content.hashicorp.com
+    - UNIFIED_DOCS_PORT=${UNIFIED_DOCS_PORT}
+    - UNIFIED_DOCS_API=http://unified-docs-api:${UNIFIED_DOCS_PORT}
+    - HASHI_ENV=unified-docs-sandbox
+    - NODE_ENV=development
+  profiles: [unified-docs]
+```
+
+The `depends_on` condition with `service_healthy` ensures dev-portal only starts after the unified docs API healthcheck passes. This prevents the portal from starting before the API has finished processing content.
+
+**Environment variables passed to dev-portal**
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `MKTG_CONTENT_DOCS_API` | `https://content.hashicorp.com` | Existing content API for non-migrated products |
+| `UNIFIED_DOCS_API` | `http://unified-docs-api:8080` | Points dev-portal to the local unified docs API |
+| `HASHI_ENV` | `unified-docs-sandbox` | Activates the unified docs content source in dev-portal |
+| `NODE_ENV` | `development` | Enables development mode |
+
+## Port mappings
+
+| Port | Service | URL |
+|------|---------|-----|
+| `3000` | dev-portal | `http://localhost:3000` |
+| `8080` | unified-docs-api | `http://localhost:8080` |
+
+Ports are configured via environment variables in the `.env` file (`DEV_PORTAL_PORT` and `UNIFIED_DOCS_PORT`), so they can be overridden locally if needed.
+
+## Volume mounts
+
+The `./content` directory is mounted into the unified-docs-api container at `/server/content`. This means:
+
+- You can add or modify content files on the host without rebuilding the Docker image
+- The container processes whatever is currently in your local `content/` directory
+- Changes to content require the prebuild step to re-run inside the container (which happens automatically on container restart)
+
+## Make commands
+
+| Command | Docker Compose equivalent |
+|---------|---------------------------|
+| `make` | `docker compose --profile unified-docs up` |
+| `make clean` | `docker compose --profile unified-docs down --rmi local` + remove `public/content` and `public/assets` |
+| `make clean CLEAN_OPTION=full` | Same as `make clean` but also removes the `hashicorp/dev-portal` image |

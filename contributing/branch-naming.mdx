@@ -1,0 +1,79 @@
+---
+title: "Branch naming"
+description: "Naming conventions for working branches in the web-unified-docs repository."
+---
+
+Using consistent branch names helps reviewers and automation identify who owns a branch, which product it relates to, and which issue or ticket it addresses.
+
+## Naming conventions
+
+<Tabs>
+  <Tab title="Community contributors">
+    Use the following format:
+
+    ```
+    <github_username>-<product_name>-<github_issue_number>
+    ```
+
+    **Example:**
+
+    ```
+    aimeeu-nomad-12345
+    ```
+
+    Where:
+    - `aimeeu` is the contributor's GitHub username
+    - `nomad` is the product the change relates to
+    - `12345` is the GitHub issue number the PR addresses
+  </Tab>
+  <Tab title="HashiCorp employees">
+    Use the following format:
+
+    ```
+    <name_initials_or_username>-<ticket_number>
+    ```
+
+    **Example:**
+
+    ```
+    aimeeu-ce1001
+    ```
+
+    Where:
+    - `aimeeu` is the employee's name, initials, or GitHub username
+    - `ce1001` is the internal ticket number
+  </Tab>
+</Tabs>
+
+## Why consistent naming matters
+
+Pull requests to this repository can touch documentation for many different products and versions. Consistent branch names make it easier to:
+
+- Quickly identify who owns an in-progress branch
+- Link a branch back to the issue or ticket that motivated the change
+- Filter and sort open branches when triaging stale work
+- Automatically label PRs by product based on the branch name
+
+## Creating your branch
+
+After cloning the repository, create your working branch with:
+
+```shell-session
+git checkout -b <working_branch_name>
+```
+
+For example, a community contributor working on a Nomad issue:
+
+```shell-session
+git checkout -b aimeeu-nomad-12345
+```
+
+Or a HashiCorp employee working on a tracked ticket:
+
+```shell-session
+git checkout -b aimeeu-ce1001
+```
+
+<Note>
+  For embargoed content (unreleased product or conference announcements), use the private `web-unified-docs-internal` repository instead. Contact your team's technical writer for access and guidance.
+</Note>

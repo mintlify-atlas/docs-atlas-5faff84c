@@ -1,0 +1,52 @@
+---
+title: Well-Architected Framework
+description: Well-Architected Framework documentation in the web-unified-docs repository — architectural guidance for HashiCorp products. Not versioned.
+---
+
+The Well-Architected Framework documentation provides architectural guidance and best practices for deploying and operating HashiCorp products. It is **not versioned** — all content lives in a single directory tree tracked on `main`.
+
+## Content directory
+
+```text
+content/well-architected-framework/
+├── docs/              # Markdown content files
+├── data/              # Navigation sidebar JSON files
+├── img/               # Image assets
+├── redirect-wip.jsonc # Work-in-progress redirect rules
+└── redirects.jsonc    # Active redirect rules
+```
+
+Because the Well-Architected Framework is unversioned, there are no `vX.Y.z/` subdirectories. All content lives directly under `content/well-architected-framework/docs/`.
+
+## Versioning behavior
+
+The Well-Architected Framework does not use directory-based versioning. All edits go directly to `content/well-architected-framework/docs/`. The content API tracks a single version on `main`.
+
+## Finding and editing Well-Architected Framework docs
+
+<Steps>
+  <Step title="Navigate to the content directory">
+    All Well-Architected Framework content files are in:
+
+    ```shell-session
+    ls content/well-architected-framework/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Since there are no version subdirectories, the file path maps directly to the URL route.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/well-architected-framework/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `well-architected-framework` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `versionedDocs` | `false` |

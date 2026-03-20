@@ -1,0 +1,87 @@
+---
+title: Packer
+description: Packer documentation in the web-unified-docs repository — machine image automation, versioned from v1.5.x onward.
+---
+
+Packer documentation covers automated machine image creation, builders, provisioners, post-processors, and plugin integration. It is versioned and stored in `content/packer/`.
+
+## Content directory
+
+```text
+content/packer/
+├── v1.5.x/
+├── v1.6.x/
+├── v1.7.x/
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+├── v1.11.x/
+├── v1.12.x/
+├── v1.13.x/
+└── v1.14.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/packer/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Packer content is served under two URL base paths:
+
+- `/docs/` — Packer conceptual and operational documentation
+- `/guides/` — Getting started guides and tutorials
+
+## Available versions
+
+Versions `v1.5.x` through `v1.14.x` are present in the repository.
+
+<Warning>
+Older versions (v1.5.6 and earlier) may fail migration scripts with a "content directory not found" error, indicating a different source repository directory structure. Confirm before editing.
+</Warning>
+
+<Note>
+Packer plugin documentation may still reference some third-party plugin repositories rather than being fully consolidated in this repo. If you're looking for a specific plugin's docs and cannot find them here, check the upstream plugin repository.
+</Note>
+
+## Finding and editing Packer docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/packer/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Packer content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/packer/v1.14.x/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Guides-style pages are under `guides/`; reference and conceptual pages are under `docs/`.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/packer/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `packer` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `docs`, `guides` |
+| `versionedDocs` | `true` |

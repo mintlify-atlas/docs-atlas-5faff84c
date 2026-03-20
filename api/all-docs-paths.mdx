@@ -1,0 +1,89 @@
+---
+title: All docs paths
+description: Retrieve every available documentation path across all products, used by dev-portal for static site generation.
+---
+
+## Endpoint
+
+```
+GET /api/all-docs-paths
+```
+
+Returns an array of documentation path objects for all products, or for a filtered subset of products when the `products` query parameter is provided. dev-portal uses this endpoint to discover all available documentation pages at build time.
+
+<Tip>
+  Visit `http://localhost:8080/api/all-docs-paths` to verify the unified docs API container has finished initializing. The endpoint returns data only after the content processing step completes on startup.
+</Tip>
+
+## Query parameters
+
+<ParamField query="products" type="string[]">
+  One or more product slugs to filter results. When omitted, paths for all configured products are returned.
+
+  Repeat the parameter to include multiple products:
+  `?products=terraform-plugin-framework&products=terraform-enterprise`
+
+  The legacy alias `ptfe-releases` is automatically mapped to `terraform-enterprise`.
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash All products
+curl http://localhost:8080/api/all-docs-paths
+```
+
+```bash Filtered by product
+curl "http://localhost:8080/api/all-docs-paths?products=terraform-plugin-framework"
+```
+
+```bash Multiple products
+curl "http://localhost:8080/api/all-docs-paths?products=terraform-plugin-framework&products=terraform-enterprise"
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON object with a `result` array. Each element in the array represents a single documentation page path.
+
+```json 200
+{
+  "result": [
+    {
+      "path": "terraform-plugin-framework/plugin/framework",
+      "itemPath": "plugin/framework",
+      "created_at": "2023-05-12T00:00:00Z"
+    },
+    {
+      "path": "terraform-plugin-framework/plugin/functions",
+      "itemPath": "plugin/functions",
+      "created_at": "2023-06-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+### Response fields
+
+<ResponseField name="result" type="object[]" required>
+  Array of path objects for all matching documentation pages.
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="path" type="string">
+      The full path to the document, including the product prefix. Used by dev-portal to construct page URLs.
+    </ResponseField>
+    <ResponseField name="itemPath" type="string">
+      The path to the document relative to the product's content directory.
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      ISO 8601 timestamp for when the document was first added to the repository.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | None of the requested product slugs could be resolved, or no paths exist for any of the specified products. |

@@ -1,0 +1,261 @@
+---
+title: Redirects
+description: How to configure redirects in HashiCorp Web Unified Docs when pages are moved or renamed, including the redirects.jsonc format, slug types, pattern matching, versioned redirects, and local testing.
+---
+
+When you move or rename a documentation page, you must add a redirect so that existing links continue to work. This page explains how redirects are defined, the supported slug types, and how to handle versioned products.
+
+<Warning>
+If you move an existing article without adding a redirect, links break between versions and users cannot find the information they are looking for—even if it exists in the version they are viewing. Always add a redirect when moving a page.
+</Warning>
+
+## How many redirects you need
+
+The number of redirects required depends on whether the product is versioned.
+
+<Tabs>
+  <Tab title="Unversioned products">
+    For unversioned products (e.g., HCP cloud products), add **one** redirect:
+
+    ```json
+    {
+      "source": "/old/path",
+      "destination": "/new/path",
+      "permanent": true
+    }
+    ```
+
+    This single redirect ensures requests to the old URL re-route to the new URL.
+  </Tab>
+  <Tab title="Versioned products">
+    For versioned products, add **three** redirects to cover all use cases:
+
+    1. The latest version URL (no version path segment).
+    2. The new path in older versions that don’t have it — redirect back to the old path.
+    3. The old path in newer versions that have the new path — redirect forward to the new path.
+
+    See the [Versioned redirects](#versioned-redirects) section for a complete example.
+  </Tab>
+</Tabs>
+
+## Redirect file location
+
+Each docset has its own `redirects.jsonc` file:
+
+```text
+content/<product>/<version>/redirects.jsonc
+```
+
+For example: `content/vault/v1.20.x/redirects.jsonc`.
+
+<Note>
+Only the most recent redirect file matters. The developer.hashicorp.com platform compiles redirects only from the most recent redirect file. You must carry forward (perpetuate) any backfacing redirects into each new docset, or the new version will forget how to handle them.
+</Note>
+
+## Definitions
+
+| Term | Definition |
+| :--- | :--- |
+| **Docset** | A collection of docs for a specific product and version. For example, `vault/docs/v1.20.x` lives under `content/vault/1.20.x/`. |
+| **Containing docset** | The docset associated with a specific redirect definition file. |
+| **Standard redirect** | Redirects an unversioned URL that no longer exists in the containing docset to a different URL in the same docset. |
+| **Versioned redirect** | Redirects an unversioned URL to a different URL in another docset (a different version). |
+| **Backfacing redirect** | Redirects invalid versioned URLs that use valid paths from the containing docset to appropriate URLs in other docsets. |
+
+## Slug types
+
+Three types of slugs can be used in redirect source paths.
+
+<AccordionGroup>
+  <Accordion title="Placeholders">
+    Placeholders match exactly one path segment.
+
+    - Source definition: `:<name>`
+    - Destination use: `:<name>`
+
+    Example: `/path/:slug` matches `path/subpath` but **not** `path`, `path/`, or `path/subpath/another`.
+  </Accordion>
+  <Accordion title="Wildcards">
+    Wildcards match the root path (with or without a trailing slash) and all subpaths.
+
+    - Source definition: `:<name>*`
+    - Destination use: `:<name>*`
+
+    Example: `/path/:slug*` matches `path`, `path/`, `path/subpath`, and `path/subpath/another`.
+
+    <Warning>
+    You must include the `*` character in the destination URL. Using only the slug name will not work properly.
+    </Warning>
+  </Accordion>
+  <Accordion title="Named path parameters">
+    Named parameters match a pattern or non-capture group. They can match a single path segment, multiple segments, or all subpaths.
+
+    - Source definition: `:<name>(<pattern or non-capture group>)`
+    - Destination use: `:<name>`
+
+    Example: `/path/:slug(1\.(?:9|1[0-5])\.x)` matches `path/1.9.x` through `path/1.15.x`.
+  </Accordion>
+</AccordionGroup>
+
+## Special characters in patterns
+
+| Character | Description |
+| :--- | :--- |
+| `(` and `)` | Wraps parameter definitions and non-capture groups |
+| `[` and `]` | Wraps single-character ranges |
+| `-` | Defines a single-character range (numbers or letters) |
+| `\` | Indicates a predefined character class |
+| `$` | Matches a pattern to the end of a string |
+| `.` | Matches any single character |
+| `*` | Matches a pattern zero or more times |
+| `+` | Matches a pattern one or more times |
+| `?` | Matches a pattern zero or one times |
+| `{ min, max }` | Matches a pattern `min` or more times, up to an optional `max` |
+| `:` | Starts a parameter definition |
+| `?:` | Starts a non-capture group |
+| `?!` | Starts a negative look-ahead non-capture group |
+| `\|` | Separates alternatives in a non-capture group |
+
+To escape special characters within a non-capture group, use `\\`. For example, escape the `.` in version strings as `\\.`.
+
+### Predefined character classes
+
+| Notation | Matches |
+| :--- | :--- |
+| `\d` | Single digits (0–9) |
+| `\D` | Non-digits |
+| `\w` | Any word character (alphanumeric and underscore) |
+| `\W` | Non-word characters including most special characters |
+| `\s` | Whitespace characters |
+| `\S` | Non-whitespace characters |
+
+## Example redirects
+
+### Basic redirects
+
+<CodeGroup>
+
+```json Standard redirect
+{
+  "source": "/old/path",
+  "destination": "/new/path",
+  "permanent": true
+}
+```
+
+```json Redirect all child paths
+{
+  "source": "/old/path/:slug*",
+  "destination": "/new/path/:slug*",
+  "permanent": true
+}
+```
+
+```json Redirect to a specific versioned URL
+{
+  "source": "/vault/docs/old/path",
+  "destination": "/vault/docs/v1.20.x/old/path",
+  "permanent": true
+}
+```
+
+</CodeGroup>
+
+### Pattern matching
+
+<CodeGroup>
+
+```json Starts with "hello"
+{
+  "source": "/old/path/:slug(hello.*)",
+  "destination": "/new/path/:slug",
+  "permanent": true
+}
+```
+
+```json Ends with "goodbye"
+{
+  "source": "/old/path/:slug(.*goodbye$)",
+  "destination": "/new/path/:slug",
+  "permanent": true
+}
+```
+
+</CodeGroup>
+
+### Versioned redirects
+
+In this example, you want to move `state.mdx` to a new `concepts/` directory, changing the URL from `/terraform/state` to `/terraform/concepts/state` in Terraform v1.10.x and above.
+
+Three redirects are required to cover all user scenarios:
+
+```json
+// Latest version (no version in the path)
+{
+  "source": "/terraform/state",
+  "destination": "/terraform/concepts/state",
+  "permanent": true
+}
+
+// Backfacing redirect: v1.9.x and below still use the old path
+{
+  "source": "/terraform/v:version(1\\.[0-9]\\.x)/concepts/state",
+  "destination": "/terraform/v:version/state",
+  "permanent": true
+}
+
+// Forward-facing redirect: v1.10.x and above use the new path
+{
+  "source": "/terraform/v:version(v1\\.(?:1[0-9]|[2-9][0-9])\\.x)/state",
+  "destination": "/terraform/v:version/concepts/state",
+  "permanent": true
+}
+```
+
+### Non-capture groups
+
+<CodeGroup>
+
+```json Redirect all child paths
+{
+  "source": "/old/path:slug(/?.*)" ,
+  "destination": "/new/path/:slug",
+  "permanent": true
+}
+```
+
+```json Backfacing for v1.12.x and v1.13.x
+{
+  "source": "/vault/docs/:version(v1\\.(?:12|13)\\.x)/new/path",
+  "destination": "/vault/docs/:version/old/path",
+  "permanent": true
+}
+```
+
+```json Extract version number for destination page name
+{
+  "source": "/vault/docs/v:version(1\\.(?:9|1[0-8])\\.x)/updates/important-changes",
+  "destination": "/vault/docs/v:version/upgrading/upgrade-to-:version",
+  "permanent": true
+}
+```
+
+</CodeGroup>
+
+### Negative look-ahead
+
+Redirect all `docs/agent/` paths **except** `docs/agent/autoauth/` to `/agent-and-proxy/agent/`:
+
+```json
+{
+  "source": "/vault/docs/agent/:slug((?!autoauth$).*)",
+  "destination": "/vault/docs/agent-and-proxy/agent/:slug",
+  "permanent": true
+}
+```
+
+## Limitations and gotchas
+
+- **Only the most recent redirect file is used.** The platform compiles redirects only from the most recent redirect file. You must perpetuate backfacing redirects into every new docset.
+- **You cannot split redirects across multiple files.** All redirects for a docset must live in a single `redirects.jsonc` file.
+- **Non-capture groups for subpaths require a trailing slash.** A source like `/path/:slug(.*)` works for `/path/path1` and `/path/` but not for `/path` (no trailing slash). Use `/path:slug(/?.*)` to capture both forms.

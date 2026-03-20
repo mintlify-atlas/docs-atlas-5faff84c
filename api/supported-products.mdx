@@ -1,0 +1,47 @@
+---
+title: Supported products
+description: List all product slugs that have documentation hosted in the Web Unified Docs repository.
+---
+
+## Endpoint
+
+```
+GET /api/supported-products
+```
+
+Returns an array of product slug strings for every product configured in this repository. Use this endpoint to discover which products are available before making requests to other endpoints.
+
+## Example request
+
+```bash
+curl http://localhost:8080/api/supported-products
+```
+
+## Response
+
+Returns a JSON object with a `result` array of product slug strings.
+
+```json 200
+{
+  "result": [
+    "terraform-plugin-framework",
+    "terraform-plugin-sdk",
+    "terraform-plugin-testing",
+    "terraform-plugin-log",
+    "terraform-plugin-mux",
+    "terraform-enterprise"
+  ]
+}
+```
+
+### Response fields
+
+<ResponseField name="result" type="string[]" required>
+  Array of product slug strings. Each slug is a valid value for the `productSlug` path parameter on other endpoints.
+
+  The list is derived from the server's product configuration (`PRODUCT_CONFIG`) at runtime, so it reflects the products currently deployed with this instance.
+</ResponseField>
+
+<Note>
+  The `result` array contains only the products hosted in this unified docs repository. Products that are still served by the legacy content API (`content.hashicorp.com`) are not included.
+</Note>

@@ -1,0 +1,89 @@
+---
+title: Terraform Plugin Testing
+description: Terraform Plugin Testing documentation in the web-unified-docs repository — testing library for Terraform plugin developers.
+---
+
+The Terraform Plugin Testing library provides acceptance testing and unit testing helpers for Terraform provider developers. Its documentation covers test configuration, step-based testing, import testing, and assertion patterns. It is versioned and stored in `content/terraform-plugin-testing/`.
+
+The content API uses the `terraform` product slug. The `navDataPath` for this directory is `plugin-testing`, and content is served under the `/plugin/testing/` URL base path.
+
+## Content directory
+
+```text
+content/terraform-plugin-testing/
+├── v1.0.x/
+├── v1.1.x/
+├── v1.2.x/
+├── v1.3.x/
+├── v1.4.x/
+├── v1.5.x/
+├── v1.6.x/
+├── v1.7.x/
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+├── v1.11.x/
+├── v1.12.x/
+├── v1.13.x/
+├── v1.14.x/
+└── v1.15.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/terraform-plugin-testing/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Plugin Testing content is served under `/plugin/testing/`.
+
+## Available versions
+
+Versions `v1.0.x` through `v1.15.x` are present in the repository.
+
+<Warning>
+Older versions (v1.0.x and earlier) may fail migration scripts with errors indicating missing `img/` or `data/` directories. Confirm the directory structure before editing older versions.
+</Warning>
+
+## Finding and editing Plugin Testing docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/terraform-plugin-testing/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Content files are in the `docs/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/terraform-plugin-testing/v1.15.x/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-plugin-testing/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `navDataPath` | `plugin-testing` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `plugin/testing` |
+| `versionedDocs` | `true` |

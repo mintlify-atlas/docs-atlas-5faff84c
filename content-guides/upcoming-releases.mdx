@@ -1,0 +1,178 @@
+---
+title: Upcoming Release Documentation
+description: Internal HashiCorp employee workflow for creating and publishing documentation for upcoming minor and major product releases, including assembly branch conventions and the merge process.
+---
+
+This guide is for internal HashiCorp employees who need to create or update documentation for a product release before it ships.
+
+<Warning>
+If you need to create documentation for embargoed content—including product or conference announcements—use the private `web-unified-docs-internal` repository instead. Contact your team's technical writer for guidance.
+</Warning>
+
+## Which workflow to use
+
+<CardGroup cols={2}>
+  <Card title="Minor or patch release" icon="tag">
+    Use the upcoming minor release workflow when preparing documentation for the next minor or patch version (e.g., v1.21.0 or v1.20.3).
+  </Card>
+  <Card title="Major release" icon="rocket">
+    Use the upcoming major release workflow when preparing documentation for the next major version (e.g., v2.0.0), which typically introduces a new version folder.
+  </Card>
+</CardGroup>
+
+## Before you begin
+
+Before contributing to release documentation, make sure:
+
+- Your GitHub username is a member of the [HashiCorp core team](https://github.com/orgs/hashicorp/teams/core). Request access via [Doormat](https://doormat.hashicorp.services/applications/access/github/role/doormat-github-access-core/options).
+- You have `write` access to `web-unified-docs` via Doormat.
+- You have a valid [SSH key configured for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent).
+
+## Upcoming minor release
+
+Each product's tech writer team creates an assembly branch for the upcoming minor or patch release. Most products use the `<product>/<exact_release_number>` format. Vault uses `vault/<YYYYMM>`. Check with your team for the exact branch name.
+
+<Steps>
+  <Step title="Clone the release branch">
+    Clone only the upcoming minor release branch to save space and time:
+
+    ```shell-session
+    $ git clone --single-branch --branch <minor_branch_name> \
+        git@github.com:hashicorp/web-unified-docs.git
+    ```
+
+    For example, if the upcoming Vault minor release branch is `vault/202511`:
+
+    ```shell-session
+    $ git clone --single-branch --branch vault/202511 \
+        git@github.com:hashicorp/web-unified-docs.git
+    ```
+  </Step>
+
+  <Step title="Create your working branch">
+    Create a local working branch, following the [branch naming conventions](/content-guides/upcoming-releases#branch-naming-conventions):
+
+    ```shell-session
+    $ git checkout -b <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Make your changes">
+    Make your changes in the **current release folder**. If you need to create a new page, follow the [Create a New Page](/content-guides/create-new-page) guide.
+
+    Content should adhere to the Education style guide.
+  </Step>
+
+  <Step title="Preview locally (optional)">
+    From the `web-unified-docs` directory, run `make` to build the documentation site in Docker:
+
+    ```shell-session
+    $ make
+    ```
+
+    Wait for both the `unified-devdot-api` and `dev-portal` containers to complete before testing. Access the preview at `http://localhost:3000`.
+
+    To stop:
+
+    ```shell-session
+    $ make clean
+    ```
+  </Step>
+
+  <Step title="Commit and push your changes">
+    ```shell-session
+    $ git commit -a -m "<short description about the changes>"
+    $ git push origin <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Open a pull request against the release branch">
+    Create a pull request targeting the upcoming **minor release branch** (not `main`). In the GitHub web UI's **base:** dropdown, select the release branch you cloned in step one.
+
+    Pull requests are automatically labeled and assigned to the product's documentation team for review.
+  </Step>
+
+  <Step title="Merge after approval">
+    After a technical writer approves your PR, merge it into the release assembly branch.
+
+    The product tech writer team is responsible for merging the assembly branch into `main` as part of the minor/patch version release process.
+  </Step>
+</Steps>
+
+## Upcoming major release
+
+For major releases, each product's tech writer team creates both a release branch (`<product>/<exact_release_number>`) and the upcoming release version folder. Check with your team for the names of both.
+
+<Steps>
+  <Step title="Clone the major release branch">
+    ```shell-session
+    $ git clone --single-branch --branch <major_branch_name> \
+        git@github.com:hashicorp/web-unified-docs.git
+    ```
+
+    For example, if the upcoming Nomad major release branch is `nomad/2.0.0`:
+
+    ```shell-session
+    $ git clone --single-branch --branch nomad/2.0.0 \
+        git@github.com:hashicorp/web-unified-docs.git
+    ```
+  </Step>
+
+  <Step title="Create your working branch">
+    ```shell-session
+    $ git checkout -b <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Make your changes">
+    Make your changes in the **upcoming release folder** created by your tech writer team. If you need to create a new page, follow the [Create a New Page](/content-guides/create-new-page) guide.
+  </Step>
+
+  <Step title="Preview locally (optional)">
+    ```shell-session
+    $ make
+    ```
+
+    Access the preview at `http://localhost:3000`. Run `make clean` to stop.
+  </Step>
+
+  <Step title="Commit and push your changes">
+    ```shell-session
+    $ git commit -a -m "<short description about the changes>"
+    $ git push origin <working_branch_name>
+    ```
+  </Step>
+
+  <Step title="Open a pull request against the major release branch">
+    Create a PR targeting the upcoming **major release branch**. In the GitHub web UI's **base:** dropdown, select the major release branch.
+  </Step>
+
+  <Step title="Merge after approval">
+    After approval, merge into the release assembly branch.
+
+    The product tech writer team is responsible for merging the major release branch as part of the major version release process.
+  </Step>
+</Steps>
+
+## Branch naming conventions
+
+Follow these conventions when naming your personal working branch:
+
+| Contributor type | Convention | Example |
+| :--- | :--- | :--- |
+| Community contributors | `<github_username>-<product_name>-<github_issue_number>` | `aimeeu-nomad-12345` |
+| HashiCorp employees | `<name_initials_or_username>-<ticket_number>` | `aimeeu-ce1001` |
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="How do I preview my PR changes before they're merged?">
+    After your PR is open, find the **Vercel Previews Deployed** comment in the PR and click **Visit Preview** to see a preview of your changes.
+  </Accordion>
+  <Accordion title="Where can I get help if my PR is approved but I can't merge it?">
+    Reach out to one of the approvers on your pull request or contact your product's tech writing team directly.
+  </Accordion>
+  <Accordion title="How long does it take for merged content to appear on developer.hashicorp.com?">
+    Content appears on the live site approximately 10 minutes after your pull request is merged into `main`. Release assembly branches are merged to `main` by the tech writer team at the time of the product release.
+  </Accordion>
+</AccordionGroup>

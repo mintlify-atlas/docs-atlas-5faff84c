@@ -1,0 +1,117 @@
+---
+title: Terraform
+description: Terraform documentation in the web-unified-docs repository — core Terraform, CDK, MCP Server, Migrate, and shared cloud docs.
+---
+
+Terraform documentation is spread across several content directories in this repository, each corresponding to a distinct Terraform product or component. All directories share the `terraform` product slug in the content API.
+
+## Content directories
+
+| Directory | What it contains | Versioned? | API slug |
+| :-------- | :--------------- | :--------: | :------- |
+| `content/terraform/` | Core Terraform CLI documentation | Yes | `terraform` |
+| `content/terraform-cdk/` | CDK for Terraform (CDKTF) documentation | Yes | `terraform` |
+| `content/terraform-docs-agents/` | HCP Terraform agent documentation | Yes | `terraform` |
+| `content/terraform-docs-common/` | Shared cloud documentation (included in TFE) | No | `terraform` |
+| `content/terraform-enterprise/` | Terraform Enterprise documentation | Yes | `terraform` |
+| `content/terraform-mcp-server/` | Terraform MCP Server documentation | Yes | `terraform` |
+| `content/terraform-migrate/` | Terraform migration tooling documentation | Yes | `terraform` |
+
+## Core Terraform (`content/terraform/`)
+
+Core Terraform documentation covers the Terraform CLI, the Terraform language (HCL), and provider development internals. It is versioned using `vMAJOR.MINOR.x` directories.
+
+**Available versions:** `v1.1.x` through `v1.15.x (beta)`
+
+Each version directory contains:
+
+```text
+content/terraform/<version>/
+├── docs/          # Markdown content files
+├── data/          # Navigation sidebar JSON files
+└── img/           # Image assets
+```
+
+**URL base paths served from this content:**
+- `/cli/` — Terraform CLI commands and configuration
+- `/internals/` — Terraform internals
+- `/intro/` — Getting started with Terraform
+- `/language/` — Terraform configuration language
+
+## CDK for Terraform (`content/terraform-cdk/`)
+
+CDK for Terraform (CDKTF) lets you use programming languages such as TypeScript, Python, Java, C#, and Go to define infrastructure. The `navDataPath` for this directory is `cdktf`, and content is served under the `/cdktf/` URL base path.
+
+**Available versions:** `v0.8.x` through `v0.21.x`
+
+## HCP Terraform agents (`content/terraform-docs-agents/`)
+
+Documentation for HCP Terraform agents — the software that runs Terraform plans and applies within your own infrastructure. The `navDataPath` is `cloud-docs-agents`, served under `/cloud-docs/agents/`.
+
+**Available versions:** `v1.2.x` through `v1.28.x`
+
+<Note>
+Older versions (v1.5.x and earlier) may have a different directory structure that the migration scripts could not fully handle. Confirm before editing older versions.
+</Note>
+
+## Shared cloud docs (`content/terraform-docs-common/`)
+
+A set of documentation pages shared across Terraform Cloud and Terraform Enterprise. This directory is **not versioned** — it tracks `main` and is treated as a single `v0.0.x` version in the content API.
+
+This directory also provides content that is automatically copied into `content/terraform-enterprise/` via a `copy-docs` workflow.
+
+```text
+content/terraform-docs-common/
+├── docs/          # Shared content files
+├── data/          # Navigation sidebar data
+├── img/           # Image assets
+└── public/        # Additional public assets
+```
+
+## Terraform Enterprise (`content/terraform-enterprise/`)
+
+See the dedicated [Terraform Enterprise page](/products/terraform-enterprise).
+
+## Terraform MCP Server (`content/terraform-mcp-server/`)
+
+Documentation for the Terraform MCP Server, which enables AI assistants to interact with Terraform. The `navDataPath` is `mcp-server`, served under `/mcp-server/`.
+
+**Available versions:** `v0.3.x`, `v0.4.x`
+
+## Terraform Migrate (`content/terraform-migrate/`)
+
+Documentation for Terraform migration tooling. The `navDataPath` is `migrate`, served under `/migrate/`.
+
+**Available versions:** `v1.0.x`, `v1.1.x`, `v1.2.x`, `v2.0.x`
+
+## Finding and editing Terraform docs
+
+<Steps>
+  <Step title="Identify the content directory">
+    Determine which Terraform component you want to edit using the table above. For core CLI and language docs, use `content/terraform/`. For CDKTF, use `content/terraform-cdk/`, and so on.
+  </Step>
+  <Step title="Find the version directory">
+    Navigate to the relevant version folder. Always edit the current release folder for published changes.
+
+    ```shell-session
+    ls content/terraform/
+    ```
+  </Step>
+  <Step title="Edit the content file">
+    Content files are MDX (`.mdx`). Navigation sidebars are JSON files in the `data/` subdirectory within each version folder.
+  </Step>
+  <Step title="Update navigation if needed">
+    If you added a new file, add it to the appropriate JSON file in `data/` to make it appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `versionedDocs` | `true` (except `terraform-docs-common`) |

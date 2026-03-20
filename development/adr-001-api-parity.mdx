@@ -1,0 +1,84 @@
+---
+title: "ADR 001 & 004: API parity"
+description: The decision to maintain parity between the unified docs API and the existing content.hashicorp.com API to simplify migration.
+---
+
+<Info>
+  **Status:** Accepted
+
+  This ADR was originally written as ADR 001 during initial implementation. ADR 004 (January 2025) extends this decision to include the `/api/static_paths` endpoint.
+</Info>
+
+## Context
+
+The `hashicorp/web-unified-docs` project aims to implement a unified product documentation repository that will eventually replace the existing content API at `content.hashicorp.com`.
+
+The existing API serves documentation content to `hashicorp/dev-portal` (the frontend application for `developer.hashicorp.com`). Without a clear direction for the shape of the new API, there was a wide-open field for how the unified docs API might be designed. This created two problems:
+
+1. **Uncertainty and scope creep.** Without constraints, API design decisions could balloon in scope.
+2. **Migration complexity.** Any changes to the API shape relative to the existing API would require front-end changes in dev-portal at the same time as the migration — significantly increasing the complexity of both efforts.
+
+## Decision
+
+The unified docs API implements parity with the existing `GET` endpoints used to fetch product documentation content for dev-portal.
+
+This parity applies to:
+
+- **Request shape** — the same URL structure and parameters
+- **Response shape** — the same JSON structure returned from each endpoint
+- **Content** — the same content returned from each endpoint, matching what the existing content API currently serves
+
+Parity does not constrain internal implementation. The unified docs API is free to implement any internal approach to serve those responses.
+
+### Endpoints in scope
+
+The following `GET` endpoints are implemented in `app/api/`:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/api/content/<productSlug>/version-metadata` | Returns version metadata. Drives the versioned docs dropdown in dev-portal and determines which nav-data versions to fetch. |
+| `/api/content/<productSlug>/nav-data/<version>/<section>` | Returns navigation data for a documentation section. Drives sidebar navigation in dev-portal. |
+| `/api/content/<productSlug>/doc/<version>/<...docsPath>` | Returns individual `.mdx` documents. |
+| `/api/content-versions` | Returns per-document version metadata. Used to filter versioned docs dropdowns to show only versions where a specific document exists. |
+| `/api/static_paths` | Returns a subset of documents prioritized for build-time rendering, based on analytics. *(Added in ADR 004, Jan 2025)* |
+
+### Endpoints out of scope
+
+The API does not aim for parity with endpoints that are not used directly by dev-portal:
+
+| Endpoint | Reason excluded |
+|----------|-----------------|
+| `POST` / `DELETE` on `/api/content/...` | Used to update the existing content database; not used by dev-portal directly |
+| `/api/algolia` | Manages Algolia search indices; indirect use only |
+| `/api/event` | Event-gathering endpoint for content source repos; future uncertain |
+
+<Note>
+  "Unused" means not used directly by `hashicorp/dev-portal` to render documentation content. These endpoints may be used by other parts of the HashiCorp web presence.
+</Note>
+
+### Future route improvements
+
+Two endpoints have routes that the team would prefer to change once migration is complete:
+
+- `/api/content-versions` → ideally `/api/content/<productSlug>/content-versions/doc/<...docsPath>`
+- `/api/content/<productSlug>/version-metadata` → ideally `/api/version-metadata/<product>`
+
+These changes are deferred until after migration to avoid adding complexity to an already complex transition.
+
+## Consequences
+
+**Positive consequences:**
+
+- Parity with the existing API significantly reduces migration complexity. Dev-portal does not need to be updated to handle a new API shape during the migration.
+- Once migration is complete, the team is in a much better position to evolve the API — any changes can be made to one API rather than coordinating changes across multiple systems simultaneously.
+- Full flexibility in internal implementation. The API can be implemented in any way under the hood, as long as the external interface matches.
+
+**Negative consequences:**
+
+- Parity may require implementing endpoints or response shapes that are not the ideal long-term interface. Some design debt is accepted as a deliberate trade-off.
+- Additional implementation work is required to match existing response shapes exactly, including content parity (not just structural parity).
+
+**Neutral consequences:**
+
+- `POST` and `DELETE` methods on content routes may no longer be needed once migration is complete.
+- The `/api/static_paths` endpoint, initially excluded, was added to scope in January 2025 following milestone planning decisions.

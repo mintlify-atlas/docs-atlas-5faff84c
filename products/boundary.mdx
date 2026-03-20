@@ -1,0 +1,94 @@
+---
+title: Boundary
+description: Boundary documentation in the web-unified-docs repository — identity-based access, API docs, and versioned content from v0.1.x onward.
+---
+
+Boundary documentation covers identity-based access management, session recording, credential brokering, the Boundary HTTP API, and CLI commands. It is versioned and stored in `content/boundary/`.
+
+## Content directory
+
+```text
+content/boundary/
+├── v0.1.x/
+├── v0.2.x/
+├── v0.3.x/
+├── v0.4.x/
+├── v0.5.x/
+├── v0.6.x/
+├── v0.7.x/
+├── v0.8.x/
+├── v0.9.x/
+├── v0.10.x/
+├── v0.11.x/
+├── v0.12.x/
+├── v0.13.x/
+├── v0.14.x/
+├── v0.15.x/
+├── v0.16.x/
+├── v0.17.x/
+├── v0.18.x/
+├── v0.19.x/
+├── v0.20.x/
+└── v0.21.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/boundary/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Boundary content is served under two URL base paths:
+
+- `/api-docs/` — Boundary HTTP API reference
+- `/docs/` — Boundary conceptual and operational documentation
+
+## Available versions
+
+Versions `v0.1.x` through `v0.21.x` are present in the repository.
+
+<Info>
+Boundary's initial migration to this repository succeeded without known issues. All version directories should be accessible.
+</Info>
+
+## Finding and editing Boundary docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/boundary/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Boundary content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/boundary/v0.21.x/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. API reference pages are under `api-docs/`; all other documentation is under `docs/`.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/boundary/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `boundary` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `api-docs`, `docs` |
+| `versionedDocs` | `true` |

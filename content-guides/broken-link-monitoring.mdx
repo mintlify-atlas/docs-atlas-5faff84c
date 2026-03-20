@@ -1,0 +1,184 @@
+---
+title: Broken Link Monitoring
+description: How the HashiCorp Web Unified Docs broken link monitoring system works, including PR previews, weekly production scans, GitHub issue integration, Datadog alerts, the UDR Migration Link Check workflow, and how to run the checker locally.
+---
+
+The `web-unified-docs` repository uses a focused broken link monitoring system that provides visibility without blocking development. The system separates PR-time feedback (informational) from production monitoring (critical alerts).
+
+## How the system works
+
+<CardGroup cols={2}>
+  <Card title="PR previews" icon="eye">
+    Shows all broken links found in changed files as a PR comment. PRs never fail due to broken links. Development continues unblocked.
+  </Card>
+  <Card title="Production monitoring" icon="bell">
+    Weekly full content scan every Monday. Broken links are logged to Datadog and tracked in a single auto-updated GitHub issue.
+  </Card>
+</CardGroup>
+
+## PR previews (informational only)
+
+When you open or update a pull request, the link checker scans the content and posts a comment listing any broken links it finds.
+
+- PRs **never fail** due to broken links.
+- All broken links are shown in PR comments for awareness.
+- No Datadog alerts are triggered for PR previews.
+- Development continues unblocked.
+
+<Note>
+The link checker scans all content, not just the files you changed. It is normal to see broken links in your PR comment that are unrelated to your changes. Focus on fixing broken links in files you directly modified.
+</Note>
+
+## Production monitoring (critical alerts)
+
+The production monitoring system runs a full content scan every Monday and targets issues that directly affect end users.
+
+- **Weekly scan** — every Monday, all published content is checked.
+- **GitHub issue** — a single "Link Checker Report" issue is auto-updated with the latest results.
+- **Datadog logging** — production broken links are logged and trigger alerts.
+- **Auto-close** — the previous issue is closed when a new one is generated.
+
+### Finding current broken links
+
+To find all currently known broken links in production:
+
+1. Go to the repository's **Issues** tab.
+2. Filter by label: `link-checker-report`.
+3. Open the most recent issue — it contains all current production broken links.
+
+Or use the GitHub Issues search query:
+
+```text
+label:link-checker-report is:open
+```
+
+To view all historical reports:
+
+```text
+label:link-checker-report
+```
+
+## UDR Migration Link Check
+
+A dedicated workflow is available for teams migrating products to the Unified Docs Repository. It lets you check links for a specific product before migrating.
+
+**Workflow file:** `.github/workflows/udr-product-link-check.yml`
+
+<Steps>
+  <Step title="Navigate to the workflow">
+    Go to the [Actions tab → UDR Product Link Check](https://github.com/hashicorp/web-unified-docs/actions/workflows/udr-product-link-check.yml).
+  </Step>
+  <Step title="Run the workflow">
+    Click **Run workflow**.
+  </Step>
+  <Step title="Select your product">
+    Choose your product from the dropdown (e.g., `terraform`, `vault`, `consul`).
+  </Step>
+  <Step title="Optionally specify custom paths">
+    Enter custom paths to check if you want to limit the scan to a specific subdirectory.
+  </Step>
+  <Step title="Review the results">
+    When the workflow completes, review the results in the generated GitHub issue.
+  </Step>
+</Steps>
+
+## Running the link checker locally
+
+You can run the broken link checker locally to preview results before opening a PR.
+
+To check all content:
+
+```shell-session
+$ npm run broken-link
+```
+
+To check a specific product directory:
+
+```shell-session
+$ npm run broken-link terraform-plugin-framework
+```
+
+Replace `terraform-plugin-framework` with the directory name of the product content you want to check.
+
+## Datadog monitoring
+
+Production broken links are tagged in Datadog for alerting and tracking. Only production events generate Datadog entries — PR previews produce no Datadog noise.
+
+### Tags
+
+| Tag | Value |
+| :--- | :--- |
+| `environment` | `production` |
+| `service` | `web-unified-docs` |
+| `alert_type` | `broken_links_production` |
+
+### Query
+
+```text
+logs("@dd.tags:environment:production AND @dd.tags:alert_type:broken_links_production")
+```
+
+## Best practices
+
+<Tabs>
+  <Tab title="For developers">
+    1. **Review PR comments** — check which links are broken in your changes.
+    2. **Fix critical internal links** — but don’t let external issues block your PR.
+    3. **Monitor the weekly GitHub issue** — stay aware of overall link health.
+    4. **Focus on content quality** — write accurate links and double-check paths before merging.
+  </Tab>
+  <Tab title="For content teams">
+    1. **Monitor the weekly GitHub issue** — prioritize fixing user-facing broken links.
+    2. **Review production Datadog alerts** — respond promptly to issues affecting users.
+    3. **Update external link policies** — avoid linking to unreliable external sites.
+    4. **Coordinate with the dev team** — ensure critical fixes get prioritized in sprints.
+  </Tab>
+</Tabs>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title='My PR shows broken links but I didn’t change those files'>
+    This is expected. The link checker scans all content to provide full visibility. Focus on:
+
+    - Fixing broken links in files you directly modified.
+    - Internal HashiCorp links (high priority).
+    - Considering whether external links in your area can be improved.
+  </Accordion>
+  <Accordion title="An external site is temporarily down">
+    For temporary external outages:
+
+    - Check if the site recovers before merging.
+    - Consider whether the link is essential to your content.
+    - Document known unreliable sources in your team’s notes.
+  </Accordion>
+  <Accordion title="An internal link is broken but works in my browser">
+    This usually means one of the following:
+
+    - The link works locally but resolves differently in the production environment.
+    - The path is case-sensitive in production but not locally.
+    - Double-check the exact file path and capitalization.
+
+    To verify the target file exists:
+
+    ```shell-session
+    $ find content/ -name "target-file.mdx" -type f
+    ```
+
+    Common path mistake:
+
+    ```text
+    Wrong: /content/vault/docs/agent
+    Right: /vault/docs/agent
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Why PRs don’t fail for broken links
+
+The system is intentionally non-blocking at PR time for these reasons:
+
+1. External links can break at any time, beyond any contributor’s control.
+2. Development velocity shouldn’t be blocked by external site issues.
+3. PR previews are for testing, not final production validation.
+4. Full visibility is maintained through PR comments without forcing a failed status check.

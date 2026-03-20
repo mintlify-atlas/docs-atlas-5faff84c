@@ -1,0 +1,111 @@
+---
+title: Architecture decision records
+description: Overview of ADRs in web-unified-docs, how to read them, and how to propose new architectural decisions.
+---
+
+## What are architecture decision records?
+
+An architecture decision record (ADR) is a short document that captures a single non-trivial technical decision made during a project's development. Each ADR records:
+
+- The **context** — the forces, constraints, and trade-offs that influenced the decision
+- The **decision** — what was decided, stated clearly and in active voice
+- The **consequences** — the resulting effects, both positive and negative
+
+ADRs complement higher-level documents like RFCs. An RFC tends to be written before implementation begins, but many important decisions only become clear during implementation. ADRs capture those decisions as they happen.
+
+## Why this project uses ADRs
+
+Web-unified-docs is a complex system that combines content processing, API design, build tooling, and migration workflows. Without a decision log, it becomes difficult to understand why the system was built the way it was — which makes maintenance, iteration, and onboarding harder.
+
+The project adopted ADRs ([ADR 000](/development/adr-overview#adr-000)) for the following reasons:
+
+- Decisions made during implementation are documented alongside the code
+- Future maintainers can understand the reasoning behind architectural choices without needing to excavate old PRs or Slack threads
+- Decisions are made more intentionally when there is a lightweight process to articulate and record them
+
+## How to read an ADR
+
+Each ADR follows the template described in [Michael Nygard's Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions). The sections are:
+
+| Section | What it contains |
+|---------|------------------|
+| **Status** | `proposed`, `accepted`, `deprecated`, or `superseded` (with a reference to the replacement ADR) |
+| **Context** | A value-neutral description of the forces and constraints that made a decision necessary |
+| **Decision** | What was decided. Written in active voice: "We will..." |
+| **Consequences** | All effects of the decision — positive, negative, and neutral |
+
+ADR files are located in `docs/decisions/` and named `adr-NNN-title-in-dash-case.md`.
+
+## ADRs in this project
+
+<CardGroup cols={1}>
+  <Card title="ADR 000: Document architecture decisions" href="/development/adr-overview">
+    Establishes the practice of using ADRs in this project. Defines the format, template, and storage location for all future ADRs.
+  </Card>
+
+  <Card title="ADR 001: Parity with existing API" href="/development/adr-001-api-parity">
+    The unified docs API will implement the same GET endpoints as the existing `content.hashicorp.com` API. This reduces migration complexity and avoids requiring front-end changes during the transition.
+  </Card>
+
+  <Card title="ADR 002: Apply MDX transforms at build time" href="/development/adr-002-mdx-transforms">
+    Certain MDX transforms — especially the `@include` partial transform — must be applied before content is served. This ADR decides to apply those transforms during the prebuild script rather than at request time.
+  </Card>
+
+  <Card title="ADR 003: Author content outside the public directory" href="/development/adr-003-content-directory">
+    MDX source files are stored in `content/` rather than `public/`. Transformed output is written to `public/content/` and excluded from version control. This separates authored source from build output.
+  </Card>
+
+  <Card title="ADR 004: Parity with existing API (Jan 2025 update)" href="/development/adr-001-api-parity">
+    An update to ADR 001, extending the API parity commitment to include the `/api/static_paths` endpoint, following decisions made during 2024 Q3 and 2025 Q1 milestone planning.
+  </Card>
+</CardGroup>
+
+## How to propose a new ADR
+
+<Steps>
+  <Step title="Identify a non-trivial architectural decision">
+    An ADR is appropriate when you face a decision that involves real trade-offs — where multiple approaches are plausible and the choice has lasting consequences. Trivial implementation details do not need ADRs.
+  </Step>
+
+  <Step title="Create the ADR file">
+    Create a new file in `docs/decisions/` following the naming convention:
+
+    ```
+    docs/decisions/adr-NNN-title-in-dash-case.md
+    ```
+
+    Use the next available number for `NNN`.
+  </Step>
+
+  <Step title="Fill in the template">
+    Use the following structure:
+
+    ```markdown
+    # ADR NNN: Title
+
+    ## Status
+
+    Proposed
+
+    ## Context
+
+    Describe the forces influencing this decision. Be value-neutral.
+
+    ## Decision
+
+    We will...
+
+    ## Consequences
+
+    List all consequences, positive and negative.
+    ```
+  </Step>
+
+  <Step title="Set status to Proposed and open a PR">
+    Submit the ADR as `Proposed` status in a pull request. Discuss with the team. Once there is agreement, update the status to `Accepted` before merging.
+  </Step>
+</Steps>
+
+<Tip>
+  If a later decision changes or reverses an existing ADR, mark the original as `Superseded by ADR NNN` and link to the new ADR. Do not delete or retroactively edit the original.
+</Tip>

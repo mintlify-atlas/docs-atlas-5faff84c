@@ -1,0 +1,103 @@
+---
+title: "Versioned content"
+description: "How versioned product documentation is organized and how to edit the right version."
+---
+
+Many products in this repository maintain documentation for multiple simultaneous versions. This page explains how versioned content is structured and how to work with it.
+
+## Versioned vs. unversioned products
+
+The following table lists all products in the repository and whether their documentation is versioned:
+
+| Product | Directory | Versioned |
+|---|---|---|
+| Boundary | `content/boundary` | Yes |
+| Consul | `content/consul` | Yes |
+| HCP | `content/hcp-docs` | No |
+| HCP Vault Dedicated | `content/hcp-docs` | No |
+| HCP Vault Secrets | `content/hcp-docs` | No |
+| HCP Packer | `content/hcp-docs` | No |
+| Nomad | `content/nomad` | Yes |
+| Sentinel | `content/sentinel` | Yes |
+| Terraform | `content/terraform` | Yes |
+| Terraform CDK | `content/terraform-cdk` | Yes |
+| HCP Terraform agents | `content/terraform-docs-agents` | Yes |
+| Terraform (common docs) | `content/terraform-docs-common` | No |
+| Terraform Enterprise | `content/terraform-enterprise` | Yes |
+| Terraform MCP Server | `content/terraform-mcp-server` | Yes |
+| Terraform Migrate | `content/terraform-migrate` | Yes |
+| Terraform Plugin Framework | `content/terraform-plugin-framework` | Yes |
+| Terraform Plugin Log | `content/terraform-plugin-log` | Yes |
+| Terraform Plugin Mux | `content/terraform-plugin-mux` | Yes |
+| Terraform Plugin SDK | `content/terraform-sdk` | Yes |
+| Terraform Plugin Testing | `content/terraform-plugin-testing` | Yes |
+| Vault | `content/vault` | Yes |
+| Waypoint | `content/hcp-docs` | No |
+| Well-Architected Framework | `content/well-architected-framework` | No |
+
+## Directory structure for versioned products
+
+For versioned products, the product directory contains one subdirectory per supported version:
+
+```text
+content/terraform/
+├── v1.7.x/
+│   ├── docs/
+│   ├── data/
+│   └── img/
+├── v1.8.x/
+│   ├── docs/
+│   ├── data/
+│   └── img/
+└── v1.9.x/
+    ├── docs/
+    ├── data/
+    └── img/
+```
+
+Each version subdirectory is self-contained: it includes the MDX content files, the navigation sidebar data, and the image assets for that specific version.
+
+For unversioned products, the product directory contains content directly:
+
+```text
+content/hcp-docs/
+├── content/
+├── data/
+└── public/
+```
+
+## Finding the right version to edit
+
+When updating **currently published documentation**, edit the files in the version directory that corresponds to the released version you want to change. If you need to apply the same fix to multiple versions, edit each version directory separately.
+
+<Tip>
+  Because all version directories are on the filesystem at the same time, you can use your editor's find-and-replace across the entire product directory to update content in all versions at once.
+</Tip>
+
+For **upcoming minor or patch releases**, each product's tech writer team creates an assembly branch named using the format `<product>/<exact_release_number>` (for example, `vault/202511`). Clone that branch and make your changes in the current release folder:
+
+```shell-session
+git clone --single-branch --branch <minor_branch_name> git@github.com:hashicorp/web-unified-docs.git
+```
+
+For **upcoming major releases**, the tech writer team also creates the new version directory. Check with your team for the branch name and the name of the new version folder.
+
+## The v-latest and RC version workflow
+
+The prebuild process and version metadata generation use the `semverCoerce` function defined for each product in `productConfig.mjs` to sort and identify the latest version. The version directory with the highest semver value is treated as the latest version and served at the `latest` version alias in the API.
+
+<Note>
+  Terraform Enterprise uses date-based version strings (e.g., `v202206-01`) rather than semver. Its `semverCoerce` function converts these date strings to a sortable semver representation purely for ordering purposes.
+</Note>
+
+When a new release is cut, the tech writer team merges the release branch into `main`. The new version directory goes live, and the `latest` alias in the API automatically points to the new highest version.
+
+## How version metadata is generated
+
+The prebuild process generates `app/api/versionMetadata.json` by:
+
+1. Scanning each versioned product's content directory for version subdirectories.
+2. Applying the product's `semverCoerce` function to normalize version strings for sorting.
+3. Writing the sorted list of versions and their metadata into `versionMetadata.json`.
+
+This file is read at runtime by the `GET /api/content/[productSlug]/version-metadata` endpoint, which the dev-portal uses to populate version selector dropdowns.

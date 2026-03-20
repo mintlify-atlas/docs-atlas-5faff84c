@@ -1,122 +1,161 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "HashiCorp Web Unified Docs",
+  "theme": "linden",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#242b2c",
+    "light": "#4a5568",
+    "dark": "#242b2c"
   },
   "favicon": "/favicon.svg",
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-          }
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
     "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "type": "github",
+      "href": "https://github.com/hashicorp/web-unified-docs"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/hashicorp/web-unified-docs"
     }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart", "architecture"]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "contributing/overview",
+              "contributing/repository-structure",
+              "contributing/versioned-content",
+              "contributing/branch-naming"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Content Guides",
+        "groups": [
+          {
+            "group": "Writing Content",
+            "pages": [
+              "content-guides/content-types",
+              "content-guides/create-new-page",
+              "content-guides/edit-markdown",
+              "content-guides/navigation-sidebars"
+            ]
+          },
+          {
+            "group": "Managing Versions",
+            "pages": [
+              "content-guides/versioning",
+              "content-guides/add-versioned-docs",
+              "content-guides/upcoming-releases"
+            ]
+          },
+          {
+            "group": "Redirects & Links",
+            "pages": [
+              "content-guides/redirects",
+              "content-guides/broken-link-monitoring"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Products",
+        "groups": [
+          {
+            "group": "HashiCorp Products",
+            "pages": [
+              "products/overview",
+              "products/terraform",
+              "products/vault",
+              "products/consul",
+              "products/nomad",
+              "products/boundary",
+              "products/packer",
+              "products/sentinel",
+              "products/vagrant"
+            ]
+          },
+          {
+            "group": "HCP Products",
+            "pages": [
+              "products/hcp-docs",
+              "products/terraform-enterprise",
+              "products/well-architected-framework"
+            ]
+          },
+          {
+            "group": "Terraform Plugins",
+            "pages": [
+              "products/terraform-plugin-framework",
+              "products/terraform-plugin-sdk",
+              "products/terraform-plugin-testing",
+              "products/terraform-plugin-log",
+              "products/terraform-plugin-mux"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/overview",
+              "api/content",
+              "api/all-docs-paths",
+              "api/content-versions",
+              "api/supported-products",
+              "api/nav-data",
+              "api/redirects"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer Guide",
+        "groups": [
+          {
+            "group": "Local Development",
+            "pages": [
+              "development/local-setup",
+              "development/docker-compose",
+              "development/environment-variables"
+            ]
+          },
+          {
+            "group": "Migration",
+            "pages": [
+              "development/migration-overview",
+              "development/migrate-product",
+              "development/update-mdx-files"
+            ]
+          },
+          {
+            "group": "Architecture Decisions",
+            "pages": [
+              "development/adr-overview",
+              "development/adr-001-api-parity",
+              "development/adr-002-mdx-transforms",
+              "development/adr-003-content-directory"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

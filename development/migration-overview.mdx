@@ -1,0 +1,96 @@
+---
+title: Migration overview
+description: Why products migrate to web-unified-docs, how the migration works at a high level, and what happens to the original product repository documentation.
+---
+
+## Why products migrate to web-unified-docs
+
+HashiCorp's documentation was historically distributed across individual product repositories. Each repository maintained its own `/website` or `/docs` directory, and a GitHub App monitored for events to extract and publish content to `developer.hashicorp.com` via the existing content API (`content.hashicorp.com`).
+
+This approach has several limitations:
+
+<AccordionGroup>
+  <Accordion title="Cross-version changes require many PRs">
+    Making the same change across multiple documentation versions requires multiple pull requests — one per version branch — in the product repository.
+  </Accordion>
+
+  <Accordion title="Cross-product changes are difficult">
+    Platform-level changes such as updating to MDX v2 or rewriting URLs require coordinating changes across many separate repositories.
+  </Accordion>
+
+  <Accordion title="Event-driven publishing is fragile">
+    If a GitHub event is missed, documentation becomes stale. There is no simple way to republish without triggering a new event.
+  </Accordion>
+
+  <Accordion title="Docs can block product releases">
+    When documentation lives in product repositories, broken docs can interfere with the release workflow for the product itself.
+  </Accordion>
+
+  <Accordion title="Adding a new product requires code changes">
+    Onboarding a new product to the content API requires code changes on the API side and installation of a GitHub App in the product repository.
+  </Accordion>
+</AccordionGroup>
+
+The unified docs repository (`hashicorp/web-unified-docs`) solves these problems by centralizing all product documentation into a single repository and a single branch.
+
+<CardGroup cols={2}>
+  <Card title="Single PR for all versions" icon="git-pull-request">
+    All versioned docs live on the filesystem simultaneously. A find-and-replace can update content across every version in a single PR.
+  </Card>
+  <Card title="Simple onboarding" icon="folder-plus">
+    Adding a new product is as simple as creating a new folder in `content/` and adding an entry to `productConfig.mjs`.
+  </Card>
+  <Card title="Reliable publishing" icon="check">
+    Publishing is driven by the repository itself, not external events. If something goes wrong, just run the process again.
+  </Card>
+  <Card title="Docs no longer block releases" icon="shield">
+    Documentation changes are fully decoupled from product release workflows.
+  </Card>
+</CardGroup>
+
+## How the migration works
+
+The migration process extracts versioned documentation from a product repository's git history and copies it into the `content/` directory of web-unified-docs. The existing `content.hashicorp.com` API is used to determine which git refs correspond to the versions currently live on `developer.hashicorp.com`.
+
+For each version, the migration script:
+
+1. Clones the product repository into a temporary `.content-source-repos/` directory
+2. Checks out the git ref corresponding to that version
+3. Copies content files (`.mdx`) into `content/<product-slug>/<version>/`
+4. Copies navigation data (`*-nav-data.json`) into the same versioned directory
+5. Converts and copies redirects from `redirects.js` to `redirects.jsonc`
+6. Copies image assets into `content/<product-slug>/<version>/img/`
+
+After migration, the content structure in web-unified-docs mirrors the directory-based versioning approach rather than the git branch and tag strategy used in product repos.
+
+## After migration: web-unified-docs becomes the source of truth
+
+Once a product's documentation is migrated and the migration PR is merged into web-unified-docs, this repository becomes the authoritative source for that product's documentation.
+
+<Warning>
+  After migration is merged, **do not make documentation changes in the original product repository**. Changes made there will not appear on `developer.hashicorp.com`. All future documentation contributions should be made directly in `hashicorp/web-unified-docs`.
+</Warning>
+
+To communicate this clearly to contributors, the `update-mdx-files.sh` script adds a prominent notice to all `.mdx` files in the original product repository's `/website` directory. This notice appears at the top of each file in the source editor and directs contributors to make changes in web-unified-docs instead.
+
+## Temporary fallback
+
+During the transition period, the original documentation may temporarily remain in the product repository as a fallback. The existing content API continues to serve content for products that have not yet completed migration, and dev-portal sources content from both APIs simultaneously.
+
+The architecture looks like this:
+
+- Non-migrated products: content flows from the product repo → existing content API → dev-portal
+- Migrated products: content flows from web-unified-docs → unified docs API → dev-portal
+
+Once migration is complete for a product, the original `/website` directory in the product repo is kept for historical reference but is no longer the source for published documentation.
+
+## What happens to the original product repo docs
+
+After migration:
+
+1. The `update-mdx-files.sh` script adds a deprecation notice to every `.mdx` file in the original location
+2. Contributors are directed to make future changes in web-unified-docs
+3. The original files remain in place but are no longer published
+4. The product repository's documentation workflow (GitHub App, event-based publishing) is eventually decommissioned for that product
+
+See [Update MDX files](/development/update-mdx-files) for details on the script that adds the contributor notice.

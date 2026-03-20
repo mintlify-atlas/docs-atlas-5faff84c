@@ -1,0 +1,68 @@
+---
+title: HCP (HashiCorp Cloud Platform)
+description: HCP documentation in the web-unified-docs repository — HCP Vault Dedicated, HCP Vault Secrets, HCP Packer, and HCP Waypoint. Not versioned.
+---
+
+HCP (HashiCorp Cloud Platform) documentation covers all cloud-hosted HashiCorp products. Unlike most other products in this repository, HCP docs are **not versioned** — all content lives in a single directory tree tracked on `main`.
+
+## Products covered
+
+The `content/hcp-docs/` directory contains documentation for:
+
+- **HCP Vault Dedicated** — Managed Vault clusters on HCP
+- **HCP Vault Secrets** — Application secrets management on HCP
+- **HCP Packer** — Managed machine image registry on HCP
+- **HCP Waypoint** — Application lifecycle management on HCP
+
+<Info>
+HCP Waypoint documentation is maintained here, in `content/hcp-docs/`. The Waypoint Community Edition (open-source Waypoint) is no longer actively maintained and is not part of this repository.
+</Info>
+
+## Content directory
+
+```text
+content/hcp-docs/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+├── img/             # Image assets
+└── redirects.jsonc  # Redirect rules
+```
+
+Because HCP docs are unversioned, there are no `vX.Y.z/` subdirectories. All content lives directly under `content/hcp-docs/content/`.
+
+## Versioning behavior
+
+HCP docs do not use directory-based versioning. In the content API, the content is treated as a single version (`v0.0.x`) and the branch for the latest version is always `main`.
+
+<Note>
+Because there is only one version, all edits to HCP docs go directly to the `content/hcp-docs/content/` directory. You do not need to identify a version folder before editing.
+</Note>
+
+## Finding and editing HCP docs
+
+<Steps>
+  <Step title="Navigate to the content directory">
+    All HCP content files are in a single location:
+
+    ```shell-session
+    ls content/hcp-docs/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Since there are no version subdirectories, the file path maps directly to the URL route.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/hcp-docs/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `hcp` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `.` (repository root in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `versionedDocs` | `false` |

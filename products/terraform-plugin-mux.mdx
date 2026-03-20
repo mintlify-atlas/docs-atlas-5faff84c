@@ -1,0 +1,90 @@
+---
+title: Terraform Plugin Mux
+description: Terraform Plugin Mux documentation in the web-unified-docs repository — protocol multiplexing for Terraform plugin developers.
+---
+
+The Terraform Plugin Mux library allows a Terraform provider to combine multiple protocol implementations — for example, serving some resources from the Plugin Framework and others from the Plugin SDK — through a single provider binary. Its documentation covers mux server configuration and migration patterns. It is versioned and stored in `content/terraform-plugin-mux/`.
+
+The content API uses the `terraform` product slug. The `navDataPath` for this directory is `plugin-mux`, and content is served under the `/plugin/mux/` URL base path.
+
+## Content directory
+
+```text
+content/terraform-plugin-mux/
+├── v0.6.x/
+├── v0.7.x/
+├── v0.8.x/
+├── v0.9.x/
+├── v0.10.x/
+├── v0.11.x/
+├── v0.12.x/
+├── v0.13.x/
+├── v0.14.x/
+├── v0.15.x/
+├── v0.16.x/
+├── v0.17.x/
+├── v0.18.x/
+├── v0.19.x/
+├── v0.20.x/
+├── v0.21.x/
+└── v0.22.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/terraform-plugin-mux/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Plugin Mux content is served under `/plugin/mux/`.
+
+## Available versions
+
+Versions `v0.6.x` through `v0.22.x` are present in the repository.
+
+<Warning>
+Older versions (v0.6.x and earlier) may fail migration scripts with errors indicating missing `img/`, `docs/`, or `data/` directories. Confirm the directory structure before editing older versions.
+</Warning>
+
+## Finding and editing Plugin Mux docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/terraform-plugin-mux/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Content files are in the `docs/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/terraform-plugin-mux/v0.22.x/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-plugin-mux/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `navDataPath` | `plugin-mux` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `plugin/mux` |
+| `versionedDocs` | `true` |

@@ -1,0 +1,92 @@
+---
+title: Nomad
+description: Nomad documentation in the web-unified-docs repository — workload orchestration, API docs, and versioned content from v0.11.x onward.
+---
+
+Nomad documentation covers workload scheduling, cluster management, job specifications, the Nomad HTTP API, and CLI commands. It is versioned and stored in `content/nomad/`.
+
+## Content directory
+
+```text
+content/nomad/
+├── global/           # Shared assets used across versions
+├── v0.11.x/
+├── v0.12.x/
+├── v1.0.x/
+├── v1.1.x/
+├── v1.2.x/
+├── v1.3.x/
+├── v1.4.x/
+├── v1.5.x/
+├── v1.6.x/
+├── v1.7.x/
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+└── v1.11.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/nomad/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Nomad content is served under several URL base paths:
+
+- `/api-docs/` — Nomad HTTP API reference
+- `/intro/` — Getting started with Nomad
+- `/docs/` — Nomad conceptual and operational documentation
+- `/commands/` — Nomad CLI command reference
+- `/plugins/` — Task driver and device plugin documentation
+- `/tools/` — Nomad tooling documentation
+
+## Available versions
+
+Versions `v0.11.x` through `v1.11.x` are present in the repository. The `global/` directory contains content shared across all versions.
+
+<Warning>
+Older versions (v0.12.x and earlier) may fail migration scripts with a "content directory not found" error, indicating a different source repository directory structure. Confirm the structure before editing these older versions.
+</Warning>
+
+## Finding and editing Nomad docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/nomad/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Nomad content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/nomad/v1.11.x/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Match the URL base path to the correct subdirectory — for example, API docs are under `api-docs/` and CLI commands under `commands/`.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/nomad/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `nomad` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `api-docs`, `intro`, `docs`, `commands`, `plugins`, `tools` |
+| `versionedDocs` | `true` |

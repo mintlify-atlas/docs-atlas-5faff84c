@@ -1,0 +1,80 @@
+---
+title: Terraform Plugin Log
+description: Terraform Plugin Log documentation in the web-unified-docs repository — structured logging for Terraform plugin developers.
+---
+
+The Terraform Plugin Log library provides structured logging capabilities for Terraform provider developers. Its documentation covers log levels, context-based logging, filtering, and integration with the Terraform Plugin Framework and SDK. It is versioned and stored in `content/terraform-plugin-log/`.
+
+The content API uses the `terraform` product slug. The `navDataPath` for this directory is `plugin-log`, and content is served under the `/plugin/log/` URL base path.
+
+## Content directory
+
+```text
+content/terraform-plugin-log/
+├── v0.4.x/
+├── v0.5.x/
+├── v0.6.x/
+├── v0.7.x/
+├── v0.8.x/
+├── v0.9.x/
+└── v0.10.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/terraform-plugin-log/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Plugin Log content is served under `/plugin/log/`.
+
+## Available versions
+
+Versions `v0.4.x` through `v0.10.x` are present in the repository.
+
+<Info>
+Terraform Plugin Log had a successful initial migration — all version directories should be accessible without known directory structure issues.
+</Info>
+
+## Finding and editing Plugin Log docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/terraform-plugin-log/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Content files are in the `docs/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/terraform-plugin-log/v0.10.x/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-plugin-log/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `navDataPath` | `plugin-log` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `plugin/log` |
+| `versionedDocs` | `true` |

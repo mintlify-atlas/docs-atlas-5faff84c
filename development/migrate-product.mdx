@@ -1,0 +1,225 @@
+---
+title: Migrate a product
+description: Step-by-step guide to migrating a product's documentation from its source repository into web-unified-docs.
+---
+
+This guide walks through the full process of migrating a product's documentation into web-unified-docs. The migration scripts clone the product's source repository, extract versioned content from git history, and copy it into the `content/` directory.
+
+## Prerequisites
+
+- Node.js 22 or later
+- The GitHub CLI (`gh`) authenticated with an account that has read access to the product repository
+- Sufficient disk space for cloning the product repository (can be several GB for large products)
+
+## Step 1: Add the product to productConfig.mjs
+
+Open `productConfig.mjs` and add an entry for the product. Each entry defines how the migration script locates content, assets, and navigation data within the product repository.
+
+```javascript
+export const PRODUCT_CONFIG = {
+  // ... existing products
+  'my-product': {
+    assetDir: 'public/img',       // Path to images within websiteDir
+    basePaths: ['docs'],           // URL path prefixes for this product's docs
+    contentDir: 'content',         // Path to MDX content within websiteDir
+    dataDir: 'data',               // Path to nav-data JSON files within websiteDir
+    productSlug: 'my-product',     // Slug used in API routes
+    semverCoerce: semver.coerce,   // Function to parse version strings
+    versionedDocs: true,           // Whether this product has versioned docs
+    websiteDir: 'website',         // Root of the docs content in the product repo
+  },
+}
+```
+
+**Configuration fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `assetDir` | `string \| string[]` | Directory (or directories) containing images and other assets within `websiteDir` |
+| `basePaths` | `string[]` | URL path prefixes where this product's docs appear on `developer.hashicorp.com` |
+| `contentDir` | `string` | Directory containing `.mdx` files within `websiteDir` |
+| `dataDir` | `string` | Directory containing `*-nav-data.json` files within `websiteDir` |
+| `navDataPath` | `string` | Optional path prefix for nav data, used when it differs from `productSlug` |
+| `productSlug` | `string` | Slug used in API routes (`/api/content/<productSlug>/...`) |
+| `semverCoerce` | `Function` | Function to coerce version strings into semver objects for sorting |
+| `supportsExclusionDirectives` | `boolean` | Whether the product uses content exclusion directives |
+| `versionedDocs` | `boolean` | `true` for products with multiple versions; `false` for single-version products |
+| `websiteDir` | `string` | Root directory of all docs content within the cloned product repository |
+
+<Tip>
+  For products with non-standard version strings (such as Terraform Enterprise, which uses date-based versions like `v202401-1`), provide a custom `semverCoerce` function that converts the version string into a semver-compatible format for sorting.
+</Tip>
+
+## Step 2: Run the migration script
+
+The migration script clones the product repository, checks out each versioned git ref, and extracts content into `content/` and assets into `public/assets/`.
+
+<CodeGroup>
+
+```bash Migrate all versions of a product
+node ./scripts/migrate-content/migrate-content.mjs my-product
+```
+
+```bash Migrate a specific version
+node ./scripts/migrate-content/migrate-content.mjs my-product:v1.2.x
+```
+
+```bash Migrate multiple products at once
+node ./scripts/migrate-content/migrate-content.mjs my-product other-product
+```
+
+```bash Force overwrite existing content
+node ./scripts/migrate-content/migrate-content.mjs my-product -force
+```
+
+</CodeGroup>
+
+The script temporarily clones repositories into `.content-source-repos/`. This directory can be deleted after the migration completes.
+
+**Expected output structure after migration:**
+
+```
+content/
+  my-product/
+    v1.3.x/
+      content/           # MDX documentation files
+        index.mdx
+        getting-started.mdx
+      data/              # Navigation data
+        docs-nav-data.json
+      img/               # Images and assets
+        architecture.png
+      redirects.jsonc    # Redirects converted from redirects.js
+    v1.2.x/
+      ...
+```
+
+<Note>
+  The script contacts the existing `content.hashicorp.com` API to determine which git refs correspond to the versions currently live on `developer.hashicorp.com`. An internet connection is required during migration.
+</Note>
+
+## Step 3: Verify the migration locally
+
+<Steps>
+  <Step title="Start the local preview">
+    ```bash
+    make
+    ```
+  </Step>
+
+  <Step title="Wait for the API to finish processing">
+    Visit `http://localhost:8080/api/all-docs-paths` and confirm that paths for your product appear in the response.
+  </Step>
+
+  <Step title="Test content endpoints">
+    Fetch a specific document from the API and compare it to the response from the existing content API:
+
+    ```bash
+    # From the unified docs API
+    curl http://localhost:8080/api/content/my-product/doc/latest/getting-started
+
+    # From the existing content API (for comparison)
+    curl https://content.hashicorp.com/api/content/my-product/doc/latest/getting-started
+    ```
+  </Step>
+
+  <Step title="Check the dev-portal preview">
+    Open `http://localhost:3000` and navigate to the product's documentation. Verify that:
+
+    - The version dropdown shows the expected versions
+    - Navigation sidebars render correctly
+    - Document content renders without errors
+    - Images load correctly
+  </Step>
+</Steps>
+
+## Step 4: Run the broken link checker
+
+Before submitting the migration PR, check for broken links in the migrated content.
+
+<CodeGroup>
+
+```bash Check all content
+npm run broken-link
+```
+
+```bash Check only the migrated product
+npm run broken-link my-product
+```
+
+</CodeGroup>
+
+Review the output and fix any broken internal links in the migrated content. External link failures are informational and do not block the migration.
+
+## Step 5: Submit the migration PR
+
+<Steps>
+  <Step title="Stage the migrated content">
+    ```bash
+    git add content/my-product
+    git add productConfig.mjs
+    ```
+  </Step>
+
+  <Step title="Commit and push">
+    ```bash
+    git commit -m "feat: migrate my-product documentation"
+    git push origin your-branch-name
+    ```
+  </Step>
+
+  <Step title="Open a pull request">
+    Open a PR against the `main` branch. Include in the PR description:
+
+    - The product being migrated
+    - The versions included in the migration
+    - A link to the Vercel preview showing the content rendering correctly
+    - Any known issues or edge cases discovered during migration
+  </Step>
+</Steps>
+
+## Step 6: Post-migration steps
+
+After the migration PR is merged:
+
+<Steps>
+  <Step title="Add the contributor notice to the original repo">
+    Run `update-mdx-files.sh` against the product repository's docs directory to add a notice redirecting contributors to web-unified-docs:
+
+    ```bash
+    ./scripts/update-mdx-files.sh ~/path/to/my-product/website/docs
+    ```
+
+    See [Update MDX files](/development/update-mdx-files) for full details.
+  </Step>
+
+  <Step title="Submit a PR to the product repository">
+    Open a PR to the product repository with the updated MDX files containing the contributor notice. This communicates to contributors that future changes should be made in web-unified-docs.
+  </Step>
+
+  <Step title="Inform the product team">
+    Notify the product documentation team and any regular contributors that the documentation has moved. Direct them to contribute in `hashicorp/web-unified-docs` going forward.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Content not found for older versions">
+    Some products stored content in a `pages/` directory in older versions rather than `content/`. The migration script may fail with an error like `my-product/website/content: No such file or directory` for these older versions.
+
+    This is a known edge case. Check the comments in `productConfig.mjs` for the specific product to see which versions are affected. You may need to skip those versions or handle them manually.
+  </Accordion>
+
+  <Accordion title="Script does not exit after completing">
+    The migration script may hang after printing the completion message when `gh repo clone` commands are used. This is a known issue related to child process handling. If you see `✅ Finished migrating all target repos and versions.` but the script has not exited, you can safely terminate it with `Ctrl+C`.
+  </Accordion>
+
+  <Accordion title="Force overwriting existing content">
+    If you need to re-run the migration to overwrite previously migrated content, pass the `-force` flag:
+
+    ```bash
+    node ./scripts/migrate-content/migrate-content.mjs my-product -force
+    ```
+  </Accordion>
+</AccordionGroup>

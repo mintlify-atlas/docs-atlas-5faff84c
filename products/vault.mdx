@@ -1,0 +1,101 @@
+---
+title: Vault
+description: Vault documentation in the web-unified-docs repository — secrets management, API docs, and versioned content from v1.4.x onward.
+---
+
+Vault documentation covers secrets management, encryption as a service, privileged access management, and the Vault HTTP API. It is versioned and stored in `content/vault/`.
+
+## Content directory
+
+```text
+content/vault/
+├── global/           # Shared assets used across versions
+├── v1.4.x/
+├── v1.5.x/
+├── v1.6.x/
+├── v1.7.x/
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+├── v1.11.x/
+├── v1.12.x/
+├── v1.13.x/
+├── v1.14.x/
+├── v1.15.x/
+├── v1.16.x/
+├── v1.17.x/
+├── v1.18.x/
+├── v1.19.x/
+├── v1.20.x/
+└── v1.21.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/vault/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Vault content is served under two URL base paths:
+
+- `/api-docs/` — Vault HTTP API reference
+- `/docs/` — Vault conceptual and operational documentation
+
+## Available versions
+
+Versions `v1.4.x` through `v1.21.x` are present in the repository. The `global/` directory contains content shared across all versions.
+
+<Note>
+Vault uses branch names in the format `vault/<YYYYMM>` for upcoming minor releases (for example, `vault/202511`). This differs from most other products that use `<product>/<exact_release_number>`. Check with the Vault tech writer team for the current assembly branch name.
+</Note>
+
+<Warning>
+Older versions (v1.6.x and earlier) may fail migration scripts with a "content directory not found" error, indicating a different directory structure in the source repository. Confirm the structure before editing older versions.
+</Warning>
+
+## Exclusion directives
+
+Vault supports exclusion directives (`supportsExclusionDirectives: true`). This means certain pages can be excluded from the content output using special directives in the source. Take care when restructuring content to preserve any existing exclusion annotations.
+
+## Finding and editing Vault docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/vault/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Vault's content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/vault/v1.21.x/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. For pages that appear in both the `docs/` and `api-docs/` base paths, make sure you're editing the right subdirectory.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/vault/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `vault` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `api-docs`, `docs` |
+| `versionedDocs` | `true` |
+| `supportsExclusionDirectives` | `true` |

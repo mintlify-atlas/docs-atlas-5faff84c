@@ -1,0 +1,120 @@
+---
+title: "Repository structure"
+description: "A map of the web-unified-docs repository layout and what each directory contains."
+---
+
+Understanding the repository layout helps you find the right place to make changes. This page covers each top-level directory and its purpose.
+
+## Top-level layout
+
+```text
+web-unified-docs/
+├── content/              # All product documentation (edit content here)
+├── app/
+│   └── api/              # Next.js API route handlers
+├── scripts/              # Prebuild and utility scripts
+├── docs/                 # ADRs, content guides, and workflow documentation
+├── public/               # Generated output (do not edit manually)
+├── productConfig.mjs     # Per-product configuration
+├── docker-compose.yaml   # Local development environment definition
+├── makefile              # Convenience commands for local development
+└── package.json          # Node.js dependencies and npm scripts
+```
+
+## `content/` directory
+
+This is where all documentation content lives. It is the only directory you need to edit when contributing documentation changes.
+
+The `content/` directory is organized by product:
+
+```text
+content/
+├── boundary/             # Versioned
+│   ├── v0.17.x/
+│   └── v0.18.x/
+├── hcp-docs/             # Unversioned
+│   ├── docs/
+│   └── data/
+├── terraform/            # Versioned
+│   ├── v1.8.x/
+│   └── v1.9.x/
+└── vault/                # Versioned
+    ├── v1.16.x/
+    └── v1.17.x/
+```
+
+Each product subdirectory contains:
+
+- **MDX content files** — the documentation pages
+- **Navigation data files** — JSON files (e.g., `docs-nav-data.json`) that define the sidebar structure
+- **Image assets** — product images referenced in the documentation
+- **A `README.md`** — product-specific contributing guidance
+
+See [versioned content](/contributing/versioned-content) for a full explanation of how versioned and unversioned products differ.
+
+## `app/api/` directory
+
+Contains the Next.js API Route Handlers that serve documentation content to the dev-portal. These are not content files — they are the server-side logic for the unified docs API.
+
+```text
+app/api/
+├── all-docs-paths/       # GET /api/all-docs-paths
+│   ├── route.ts
+│   └── route.test.ts
+├── assets/
+│   └── [productSlug]/    # GET /api/assets/[productSlug]/[version]/[...path]
+├── content/
+│   └── [productSlug]/
+│       ├── doc/          # GET /api/content/[productSlug]/doc/[version]/[...path]
+│       ├── nav-data/     # GET /api/content/[productSlug]/nav-data/[version]/[...section]
+│       ├── redirects/    # GET /api/content/[productSlug]/redirects
+│       └── version-metadata/  # GET /api/content/[productSlug]/version-metadata
+├── content-versions/     # GET /api/content-versions
+│   ├── route.ts
+│   └── route.test.ts
+├── supported-products/   # GET /api/supported-products
+│   └── route.ts
+└── types.ts              # Shared TypeScript types
+```
+
+<Note>
+  API routes also read from `app/api/docsPaths.json` and `app/api/versionMetadata.json`, which are generated files created by the prebuild process. Do not edit these files manually.
+</Note>
+
+## `scripts/` directory
+
+Contains Node.js and shell scripts used for content processing and maintenance.
+
+| Script | Purpose |
+|---|---|
+| Prebuild scripts | Process raw content from `/content` into the `public/` output directory. Run automatically inside the Docker container and via `npm run prebuild`. |
+| Migration scripts | Help migrate documentation from product repositories into the unified docs format. Used when onboarding a new product. |
+| `update-mdx-files.sh` | Adds a migration notice to MDX files in the original product repo location, redirecting contributors to `web-unified-docs`. |
+| Broken link scripts | Scripts that power the automated broken link checker. Can be run locally via `npm run broken-link`. |
+
+## `docs/` directory
+
+Contains documentation about the repository itself — not product documentation for developer.hashicorp.com.
+
+```text
+docs/
+├── decisions/            # Architectural Decision Records (ADRs)
+├── content-guide/        # How to create pages, manage redirects, etc.
+└── style-guide/          # HashiCorp Education style guide
+```
+
+The ADRs in `docs/decisions/` record significant architectural choices made during the design and build of this system.
+
+## `public/` directory
+
+Generated output produced by the prebuild process. **Do not edit files in this directory** — they are overwritten every time `npm run prebuild` runs.
+
+```text
+public/
+├── assets/              # Processed image assets, organized by product and version
+└── content/             # Processed MDX content, organized by product and version
+```
+
+<Warning>
+  Any manual changes to `public/` will be lost the next time the prebuild process runs, either locally or inside the Docker container.
+</Warning>

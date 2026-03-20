@@ -1,0 +1,219 @@
+---
+title: Add a New Versioned Docs Set
+description: Step-by-step instructions for adding a new set of versioned documentation to developer.hashicorp.com, including updates to the dev-portal API, web-unified-docs API, preview configuration, and merge order.
+---
+
+Adding a new docs set to developer.hashicorp.com requires coordinated pull requests in two repositories: `dev-portal` and `web-unified-docs`. This guide walks through both.
+
+<Info>
+Refer to the [Example PRs](#example-prs) section at the bottom of this page for real-world examples from previous integrations.
+</Info>
+
+## Update the dev-portal API
+
+<Steps>
+  <Step title="Create a branch in dev-portal">
+    Create a new branch for your changes in the `github.com/hashicorp/dev-portal` repository.
+  </Step>
+
+  <Step title="Register the docs in config/production.json">
+    In `config/production.json`, add the name for your new docs to the `flags.unified_docs_migrated_repos` array:
+
+    ```json
+    "flags": {
+      "enable_datadog": true,
+      "enable_io_beta_cta": true,
+      "enable_hvd_on_preview_branch": false,
+      "unified_docs_migrated_repos": [
+        "<existing-docs>",
+        "<your-new-docs>"
+      ]
+    }
+    ```
+
+    Use a descriptive, slug-style name. The API uses this string internally.
+  </Step>
+
+  <Step title="Update src/data/<product>.json">
+    Make the following changes to `src/data/<product>.json`:
+
+    1. Add a base slug to the `basePaths` object. Consider SEO — this slug is the first segment after the core product name in the URL (e.g., `developer.hashicorp.com/terraform/<base-path-slug>`).
+    2. Add the base path slug to the `docsNavItems` object so it appears in the navigation.
+    3. Add an object for the new docs with the following attributes:
+
+    | Field | Description |
+    | :--- | :--- |
+    | `iconName` | For documentation, use `"docs"`. Consult the web engineering team for other values. |
+    | `name` | The public display name for the docs. |
+    | `path` | Must match the value in `basePaths` and `docsNavItems`. |
+    | `productSlugForLoader` | Must match the name you added to `unified_docs_migrated_repos` in `config/production.json`. |
+
+    Example for the Terraform MCP server docs:
+
+    ```json
+    {
+      "iconName": "docs",
+      "name": "Terraform MCP Server",
+      "path": "mcp-server",
+      "productSlugForLoader": "terraform-mcp-server"
+    }
+    ```
+  </Step>
+
+  <Step title="Create a homepage for the docs">
+    1. Create the directory path `dev-portal/src/pages/<main-product>/<new-docs>/`.
+    2. In that directory, create a file named `[[...page]].tsx`.
+    3. Add the following content, replacing the placeholder values:
+
+    ```typescript
+    /**
+     * Copyright (c) HashiCorp, Inc.
+     * SPDX-License-Identifier: MPL-2.0
+     */
+
+    import DocsView from 'views/docs-view'
+    import { getRootDocsPathGenerationFunctions } from 'views/docs-view/utils/get-root-docs-path-generation-functions'
+
+    const { getStaticPaths, getStaticProps } = getRootDocsPathGenerationFunctions(
+      '<main-product-eg-terraform>',
+      '<value-you-added-for-basePaths-and-docsNavItems>',
+      { projectName: '<name-for-the-docs-collection>' }
+    )
+
+    export { getStaticProps, getStaticPaths }
+    export default DocsView
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Do not merge the `dev-portal` PR until you have also prepared and previewed the `web-unified-docs` PR. Both PRs must be merged in the correct order.
+</Warning>
+
+## Update the web-unified-docs API
+
+<Steps>
+  <Step title="Create a branch in web-unified-docs">
+    Create a new branch in the `github.com/hashicorp/web-unified-docs` repository.
+  </Step>
+
+  <Step title="Add MDX files and nav.json">
+    Add your `.mdx` content files and a `nav.json` navigation file for the new docs set.
+  </Step>
+
+  <Step title="Add a GitHub labeler entry">
+    Open `.github/labeler.yml` and add an entry so GitHub automatically labels PRs that touch your new directory:
+
+    ```yaml
+    <string-for-your-label>:
+      any:
+       changed-files:
+         any-glob-to-any-file: [
+           'content/<dir-for-your-collection>/**'
+       ]
+    ```
+  </Step>
+
+  <Step title="Add a CODEOWNERS entry (if needed)">
+    If a specific team should be required reviewers, add them to the `CODEOWNERS` file:
+
+    ```text
+    content/terraform-mcp-server @hashicorp/team-docs-packer-and-terraform
+    ```
+  </Step>
+
+  <Step title="Register the docs in productConfig.mjs">
+    Add an entry for your docs to `productConfig.mjs`:
+
+    ```mjs
+    '<your-docs-name>': {
+      assetDir: 'img',
+      basePaths: ['<basePath-value>'],
+      contentDir: '<dir-where-you-added-mdx-files>',
+      dataDir: 'data',
+      productSlug: '<main-product-slug>',
+      semverCoerce: semver.coerce,
+      versionedDocs: true,
+      websiteDir: 'website',
+    },
+    ```
+
+    Example for the Terraform MCP server:
+
+    ```mjs
+    'terraform-mcp-server': {
+      assetDir: 'img',
+      basePaths: ['mcp-server'],
+      contentDir: 'docs',
+      dataDir: 'data',
+      productSlug: 'terraform',
+      semverCoerce: semver.coerce,
+      versionedDocs: true,
+      websiteDir: 'website',
+    },
+    ```
+  </Step>
+
+  <Step title="Update __fixtures__/productConfig.mjs">
+    Duplicate the entry from the previous step in the `__fixtures__/productConfig.mjs` file in the repository root. This file is used for testing.
+  </Step>
+</Steps>
+
+## Preview changes
+
+Normal Vercel previews use the production state of the dev-portal API. Because your changes depend on a dev-portal API update that isn’t merged yet, you must manually configure Vercel to use your dev-portal preview branch.
+
+<Note>
+You need developer-level Vercel permissions to set environment variables. Request access before starting this process.
+</Note>
+
+<Steps>
+  <Step title="Open the dev-portal project in Vercel">
+    Log into Vercel and navigate to the `dev-portal` project settings.
+  </Step>
+  <Step title="Create a UNIFIED_DOCS_API environment variable">
+    1. Go to **Settings** → **Environment Variables** → **Create new**.
+    2. In the **Environments** section, disable **Development** so only **Preview** is selected.
+    3. Click **Select a custom Preview branch** and choose your dev-portal branch.
+    4. Set the variable key to `UNIFIED_DOCS_API`.
+  </Step>
+  <Step title="Copy the web-unified-docs preview URL">
+    In your `web-unified-docs` PR, find the **Vercel Previews Deployed** section and copy the **Unified Docs API preview** URL (for example, `https://web-unified-docs-beequ48j2-hashicorp.vercel.app/`).
+  </Step>
+  <Step title="Set the variable value and redeploy">
+    Set the `UNIFIED_DOCS_API` variable value to the preview URL and save. Confirm the redeploy prompt, or manually redeploy from the **Deployments** tab using the ellipsis menu.
+
+    <Warning>
+    After every new commit to your `web-unified-docs` PR, update the `UNIFIED_DOCS_API` variable with the new preview URL and redeploy.
+    </Warning>
+  </Step>
+</Steps>
+
+## Merge order
+
+When you are ready to publish, merge the PRs in this order:
+
+<Steps>
+  <Step title="Merge web-unified-docs first">
+    Merge your `web-unified-docs` PR.
+  </Step>
+  <Step title="Merge dev-portal second">
+    Merge your `dev-portal` PR.
+  </Step>
+  <Step title="Redeploy the website">
+    After merging, redeploy the website. If you do not have permissions, ask in the `#team-web-support` Slack channel. The redeployment takes approximately 10–15 minutes. Verify that your changes appear after it completes.
+  </Step>
+</Steps>
+
+## Example PRs
+
+<CardGroup cols={2}>
+  <Card title="TF migrate" icon="code-pull-request">
+    - [web-unified-docs #555](https://github.com/hashicorp/web-unified-docs/pull/555)
+    - [dev-portal #2808](https://github.com/hashicorp/dev-portal/pull/2808)
+  </Card>
+  <Card title="MCP server" icon="code-pull-request">
+    - [dev-portal #2835](https://github.com/hashicorp/dev-portal/pull/2835)
+    - [web-unified-docs #949](https://github.com/hashicorp/web-unified-docs/pull/949)
+  </Card>
+</CardGroup>

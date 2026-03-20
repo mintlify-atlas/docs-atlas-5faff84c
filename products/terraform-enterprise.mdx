@@ -1,0 +1,103 @@
+---
+title: Terraform Enterprise
+description: Terraform Enterprise documentation in the web-unified-docs repository — self-managed Terraform, date-based versioning.
+---
+
+Terraform Enterprise (TFE) documentation covers the self-managed version of HCP Terraform. It is versioned and stored in `content/terraform-enterprise/`. The content API uses the `terraform` product slug.
+
+## Content directory
+
+Terraform Enterprise uses a **date-based versioning scheme** in the format `v<YYYYMM>-<patch>` rather than standard semver. For example:
+
+```text
+content/terraform-enterprise/
+├── v202206-1/
+├── v202207-1/
+├── v202207-2/
+├── v202208-1/
+│   ... (monthly releases)
+├── v202501-1/
+├── v202502-1/
+├── v202502-2/
+├── v202503-1/
+├── v202504-1/
+├── v202505-1/
+├── v202506-1/
+└── v202507-1/
+```
+
+The repository also contains some older directories using a numeric versioning scheme (`1.0.x/`, `1.1.x/`, `1.2.x/`) for legacy content, plus a `releases/` and `scripts/` directory.
+
+Each monthly version directory follows this structure:
+
+```text
+content/terraform-enterprise/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Enterprise content is served under the `/enterprise/` URL base path.
+
+## Versioning details
+
+Because TFE uses date-based versions rather than semver, the `semverCoerce` function in `productConfig.mjs` converts the date-based string to semver purely for sorting purposes:
+
+```javascript
+// v202507-1 is coerced to v2025.7.1 for sorting
+semverCoerce: (versionString) => {
+  const versionRegex = /v(\d\d\d\d)(\d\d)-([\d]+)/
+  const versionParts = versionRegex.exec(versionString)
+  const [year, date, patch] = versionParts.slice(1)
+  const semverString = `v${year}.${parseInt(date)}.${patch}`
+  return semver.coerce(semverString)
+}
+```
+
+## Shared cloud documentation
+
+A subset of documentation from `content/terraform-docs-common/` is automatically copied into `content/terraform-enterprise/` via the `copy-docs` workflow. When editing documentation that may be shared between HCP Terraform and Terraform Enterprise, check whether the source file lives in `terraform-docs-common/` rather than directly in `terraform-enterprise/`.
+
+## Exclusion directives
+
+Terraform Enterprise supports exclusion directives (`supportsExclusionDirectives: true`). Certain pages can be excluded from the content output using special annotations. Preserve any existing exclusion directives when editing content.
+
+## Finding and editing Terraform Enterprise docs
+
+<Steps>
+  <Step title="Find the version directory">
+    Identify the release you want to edit. Releases use the `v<YYYYMM>-<patch>` format:
+
+    ```shell-session
+    ls content/terraform-enterprise/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Terraform Enterprise content files are in the `docs/` subdirectory:
+
+    ```shell-session
+    ls content/terraform-enterprise/v202507-1/docs/
+    ```
+  </Step>
+  <Step title="Check for shared content">
+    If you cannot find the file in the version directory, check whether it originates from `content/terraform-docs-common/docs/`.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-enterprise/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `enterprise` |
+| `versionedDocs` | `true` |
+| `supportsExclusionDirectives` | `true` |

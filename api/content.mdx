@@ -1,0 +1,143 @@
+---
+title: Get document content
+description: Fetch the MDX source and metadata for a specific documentation page by product, version, and path.
+---
+
+## Endpoint
+
+```
+GET /api/content/:productSlug/doc/:version/:docPath
+```
+
+Fetches the MDX source and associated metadata for a single documentation page. The route handler resolves the file from the content directory, parses its frontmatter, and returns both the raw markdown source and structured metadata.
+
+<Note>
+  The API checks two possible file locations for each request: `<contentDir>/<docPath>.mdx` and `<contentDir>/<docPath>/index.mdx`. Named files take precedence over index files.
+</Note>
+
+## Path parameters
+
+<ParamField path="productSlug" type="string" required>
+  The slug identifying the product. Must match a key in the server's product configuration.
+
+  Examples: `terraform-plugin-framework`, `terraform-enterprise`, `vault`
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  The documentation version to retrieve. Use `latest` to resolve to the most recent stable version automatically.
+
+  Examples: `latest`, `v1.9.x`, `v20220610-01`
+
+  For products without versioned docs, use `latest`.
+</ParamField>
+
+<ParamField path="docPath" type="string" required>
+  The path to the document, relative to the product's content directory. Segments are joined with `/`.
+
+  Example: `plugin/framework`, `docs/internals/state`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Fetch latest version
+curl http://localhost:8080/api/content/terraform-plugin-framework/doc/latest/plugin/framework
+```
+
+```bash Fetch specific version
+curl http://localhost:8080/api/content/terraform-enterprise/doc/v1.9.x/docs/install/overview
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON object with a `meta` envelope and a `result` object containing the document content and metadata.
+
+```json 200
+{
+  "meta": {
+    "status_code": 200,
+    "status_text": "OK"
+  },
+  "result": {
+    "fullPath": "plugin/framework",
+    "product": "terraform-plugin-framework",
+    "version": "v1.10.x",
+    "metadata": {
+      "page_title": "Plugin Framework",
+      "description": "Overview of the Terraform Plugin Framework."
+    },
+    "subpath": "docs",
+    "markdownSource": "---\npage_title: Plugin Framework\n---\n\n# Plugin Framework\n...",
+    "created_at": "2023-05-12T00:00:00Z",
+    "last_modified": null,
+    "sha": "",
+    "githubFile": "content/terraform-plugin-framework/v1.10.x/website/docs/plugin/framework.mdx"
+  }
+}
+```
+
+### Response fields
+
+<ResponseField name="meta" type="object" required>
+  Response envelope with HTTP status information.
+  <Expandable title="properties">
+    <ResponseField name="status_code" type="number">
+      HTTP status code. Always `200` on success.
+    </ResponseField>
+    <ResponseField name="status_text" type="string">
+      HTTP status text. Always `"OK"` on success.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="result" type="object" required>
+  The document data.
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="fullPath" type="string">
+      The normalized doc path used to locate the file, without a file extension.
+    </ResponseField>
+    <ResponseField name="product" type="string">
+      The product slug from the request.
+    </ResponseField>
+    <ResponseField name="version" type="string">
+      The resolved version string. For products without versioned docs, this is `v0.0.x`.
+    </ResponseField>
+    <ResponseField name="metadata" type="object">
+      Frontmatter fields parsed from the MDX file. Shape varies per document but commonly includes `page_title` and `description`.
+    </ResponseField>
+    <ResponseField name="subpath" type="string">
+      Always `"docs"` in the current implementation.
+    </ResponseField>
+    <ResponseField name="markdownSource" type="string">
+      The raw MDX/Markdown source of the document, including frontmatter.
+    </ResponseField>
+    <ResponseField name="created_at" type="string | null">
+      ISO 8601 timestamp for when the document was first created. Sourced from frontmatter `created_at` if present, otherwise from the pre-built docs path index.
+    </ResponseField>
+    <ResponseField name="last_modified" type="string | null">
+      ISO 8601 timestamp for when the document was last modified. Sourced from frontmatter `last_modified` if present, otherwise `null`.
+    </ResponseField>
+    <ResponseField name="sha" type="string">
+      Git SHA of the content file. Currently always an empty string.
+    </ResponseField>
+    <ResponseField name="githubFile" type="string">
+      Relative path to the source file within the repository, e.g. `content/terraform-plugin-framework/v1.10.x/website/docs/plugin/framework.mdx`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Response headers
+
+| Header | Description |
+|--------|-------------|
+| `content-type` | Always `application/json` |
+| `served-from` | Indicates whether content was served from `current build` or `production` |
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | The `productSlug` is not in the product configuration, the `version` does not exist for the product, or no content file was found at any of the expected locations. |

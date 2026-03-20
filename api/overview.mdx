@@ -1,0 +1,97 @@
+---
+title: API Overview
+description: Introduction to the HashiCorp Web Unified Docs API — what it serves, available endpoints, and how it integrates with the dev-portal frontend.
+---
+
+The HashiCorp Web Unified Docs API serves documentation content for HashiCorp products from a single repository. It is the backend that the [dev-portal](http://localhost:3000) frontend queries to retrieve MDX content, navigation trees, version lists, and redirect rules.
+
+The API is built on Next.js route handlers and runs as a containerized service. When you run the stack locally with `make`, the API is available at `http://localhost:8080`.
+
+<Note>
+  The unified docs API is intended to eventually replace the existing content API at `content.hashicorp.com`. During the migration period, dev-portal sources content from both APIs.
+</Note>
+
+## Base URL
+
+```
+http://localhost:8080
+```
+
+In production, the API runs at the deployed service URL configured via the `UNIFIED_DOCS_API` environment variable in dev-portal.
+
+## Authentication
+
+No authentication is required. All endpoints are publicly accessible.
+
+## Response format
+
+All endpoints return JSON. Successful responses follow one of two shapes:
+
+```json
+{ "result": ... }
+```
+
+or for document content:
+
+```json
+{
+  "meta": { "status_code": 200, "status_text": "OK" },
+  "result": { ... }
+}
+```
+
+Error responses return plain-text bodies with an appropriate HTTP status code (typically `404` or `400`).
+
+## How it relates to dev-portal
+
+dev-portal is the HashiCorp documentation frontend (`developer.hashicorp.com`). It uses this API to:
+
+- Fetch MDX source for individual documentation pages
+- Build sidebar navigation trees
+- Discover all available documentation paths for static generation
+- Resolve version lists and redirect rules
+
+You can verify the API is fully initialized by visiting `http://localhost:8080/api/all-docs-paths`. Once that endpoint returns data, dev-portal at `http://localhost:3000` is ready to use.
+
+## Available endpoints
+
+<CardGroup cols={2}>
+  <Card title="Get document content" icon="file-lines" href="/api/content">
+    `GET /api/content/:productSlug/doc/:version/:docPath`
+
+    Fetch the MDX source and metadata for a specific documentation page.
+  </Card>
+  <Card title="All docs paths" icon="list" href="/api/all-docs-paths">
+    `GET /api/all-docs-paths`
+
+    Retrieve every available documentation path across all products, used for static site generation.
+  </Card>
+  <Card title="Content versions" icon="code-branch" href="/api/content-versions">
+    `GET /api/content-versions`
+
+    Return the versions in which a specific document exists for a given product.
+  </Card>
+  <Card title="Supported products" icon="boxes-stacked" href="/api/supported-products">
+    `GET /api/supported-products`
+
+    List all product slugs that have documentation in this repository.
+  </Card>
+  <Card title="Nav data" icon="sidebar" href="/api/nav-data">
+    `GET /api/content/:productSlug/nav-data/:version/:section`
+
+    Fetch the navigation tree for a product section, used to render the sidebar.
+  </Card>
+  <Card title="Redirects" icon="arrow-right-arrow-left" href="/api/redirects">
+    `GET /api/content/:productSlug/redirects`
+
+    Return the redirect rules for a product.
+  </Card>
+</CardGroup>
+
+## Example request
+
+```bash
+curl http://localhost:8080/api/content/terraform-plugin-framework/doc/latest/plugin/framework
+```
+
+This fetches the latest version of the `plugin/framework` page from the `terraform-plugin-framework` product.

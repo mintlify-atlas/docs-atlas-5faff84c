@@ -1,0 +1,90 @@
+---
+title: Consul
+description: Consul documentation in the web-unified-docs repository — service networking, API docs, and versioned content from v1.8.x onward.
+---
+
+Consul documentation covers service discovery, service mesh, health checking, key/value storage, and the Consul HTTP API. It is versioned and stored in `content/consul/`.
+
+## Content directory
+
+```text
+content/consul/
+├── global/           # Shared assets used across versions
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+├── v1.11.x/
+├── v1.12.x/
+├── v1.13.x/
+├── v1.14.x/
+├── v1.15.x/
+├── v1.16.x/
+├── v1.17.x/
+├── v1.18.x/
+├── v1.19.x/
+├── v1.20.x/
+├── v1.21.x/
+└── v1.22.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/consul/<version>/
+├── content/         # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── public/img/      # Image assets
+```
+
+## URL base paths
+
+Consul content is served under three URL base paths:
+
+- `/api-docs/` — Consul HTTP API reference
+- `/docs/` — Consul conceptual and operational documentation
+- `/commands/` — Consul CLI command reference
+
+## Available versions
+
+Versions `v1.8.x` through `v1.22.x` are present in the repository. The `global/` directory contains content shared across all versions.
+
+<Warning>
+Older versions (v1.8.x and earlier) may fail migration scripts with a "content directory not found" error, indicating a different source repository directory structure. Confirm the structure before editing these versions.
+</Warning>
+
+## Finding and editing Consul docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/consul/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Consul content files are in the `content/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/consul/v1.22.x/content/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change. Content in the `api-docs/` and `commands/` base paths lives in corresponding subdirectories.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/consul/<version>/data/`. Add new files to the relevant JSON file to make them appear in the sidebar.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `consul` |
+| `contentDir` | `content` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `public/img` |
+| `basePaths` | `api-docs`, `docs`, `commands` |
+| `versionedDocs` | `true` |

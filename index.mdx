@@ -1,97 +1,86 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "HashiCorp Web Unified Docs"
+description: "The unified documentation repository and API that serves all HashiCorp product documentation at developer.hashicorp.com."
 ---
 
-## Setting up
+HashiCorp Web Unified Docs (`web-unified-docs`) is the single source of truth for all HashiCorp product documentation. It consolidates documentation from across all product repositories into one place, making it dramatically easier to contribute, version, and maintain docs at scale.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get a local preview running in minutes using Docker.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Architecture" icon="diagram-project" href="/architecture">
+    Understand how the unified docs API, content repository, and dev-portal connect.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Contributing" icon="code-pull-request" href="/contributing/overview">
+    Learn how to contribute documentation updates and new content.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Explore the REST API endpoints that serve documentation to the dev-portal.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Why unified docs?
 
-Everything you need to create world-class documentation.
+Before this project, HashiCorp documentation lived in individual product repositories — each with its own release workflow, branching strategy, and content API integration. This created friction for contributors and made platform-level changes (like updating MDX versions or rewriting URLs) extremely difficult.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+The unified docs repository solves this by:
 
-## Need inspiration?
+<CardGroup cols={2}>
+  <Card title="One repo, all products" icon="layer-group">
+    All versioned documentation lives in the `content/` directory, organized by product and version.
+  </Card>
+  <Card title="Simplified versioning" icon="code-branch">
+    Version directories on the filesystem replace the old branch/tag strategy — update all versions in a single PR.
+  </Card>
+  <Card title="Faster contributions" icon="bolt">
+    Find and fix content across all versions at once with simple find-and-replace across the filesystem.
+  </Card>
+  <Card title="Reliable publishing" icon="shield-check">
+    No more missed GitHub events or out-of-date docs — re-run the publishing process any time something goes wrong.
+  </Card>
+</CardGroup>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+## Products in this repository
+
+The following HashiCorp products have their documentation hosted here:
+
+| Product | Directory | Versioned |
+|---|---|---|
+| Boundary | `content/boundary` | Yes |
+| Consul | `content/consul` | Yes |
+| HCP | `content/hcp-docs` | No |
+| Nomad | `content/nomad` | Yes |
+| Packer | `content/packer` | Yes |
+| Sentinel | `content/sentinel` | Yes |
+| Terraform | `content/terraform` | Yes |
+| Terraform CDK | `content/terraform-cdk` | Yes |
+| Terraform Enterprise | `content/terraform-enterprise` | Yes |
+| Terraform Plugin Framework | `content/terraform-plugin-framework` | Yes |
+| Terraform Plugin SDK | `content/terraform-plugin-sdk` | Yes |
+| Terraform Plugin Testing | `content/terraform-plugin-testing` | Yes |
+| Vault | `content/vault` | Yes |
+| Well-Architected Framework | `content/well-architected-framework` | No |
+
+## How it works
+
+```mermaid
+graph LR
+    subgraph "web-unified-docs"
+        CONTENT["/content directory"]
+        API["Unified Docs API\nlocalhost:8080"]
+    end
+
+    subgraph "Frontend"
+        DP["Dev Portal\ndeveloper.hashicorp.com"]
+    end
+
+    CONTENT --> API
+    API -->|"Serves documentation content"| DP
+```
+
+Content in the `content/` directory is processed at build time into the `public/` directory. The Next.js API routes then serve that content to the dev-portal frontend.
+
+<Note>
+  Updates to the `main` branch appear on [developer.hashicorp.com](https://developer.hashicorp.com) within approximately 30 minutes.
+</Note>

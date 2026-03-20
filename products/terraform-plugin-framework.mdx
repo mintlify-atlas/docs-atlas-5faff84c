@@ -1,0 +1,103 @@
+---
+title: Terraform Plugin Framework
+description: Terraform Plugin Framework documentation in the web-unified-docs repository — for developers building Terraform providers.
+---
+
+The Terraform Plugin Framework is the recommended SDK for building Terraform providers. Its documentation covers provider development concepts, resource and data source implementation, schema definitions, and testing. It is versioned and stored in `content/terraform-plugin-framework/`.
+
+The content API uses the `terraform` product slug. The `navDataPath` for this directory is `plugin-framework`, and content is served under the `/plugin/framework/` URL base path.
+
+## Content directory
+
+```text
+content/terraform-plugin-framework/
+├── v0.7.x/
+├── v0.8.x/
+├── v0.9.x/
+├── v0.10.x/
+├── v0.11.x/
+├── v0.12.x/
+├── v0.13.x/
+├── v0.14.x/
+├── v0.15.x/
+├── v0.16.x/
+├── v0.17.x/
+├── v1.0.x/
+├── v1.1.x/
+├── v1.2.x/
+├── v1.3.x/
+├── v1.4.x/
+├── v1.5.x/
+├── v1.6.x/
+├── v1.7.x/
+├── v1.8.x/
+├── v1.9.x/
+├── v1.10.x/
+├── v1.11.x/
+├── v1.12.x/
+├── v1.13.x/
+├── v1.14.x/
+├── v1.15.x/
+├── v1.16.x/
+├── v1.17.x/
+└── v1.18.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/terraform-plugin-framework/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Plugin Framework content is served under `/plugin/framework/`.
+
+## Available versions
+
+Versions `v0.7.x` through `v1.18.x` are present in the repository.
+
+<Warning>
+Older versions (v0.7.x and earlier) may fail migration scripts with errors indicating missing `img/`, `docs/`, or `data/` directories. Confirm the directory structure before editing older versions.
+</Warning>
+
+## Finding and editing Plugin Framework docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/terraform-plugin-framework/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Content files are in the `docs/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/terraform-plugin-framework/v1.18.x/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-plugin-framework/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `navDataPath` | `plugin-framework` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `plugin/framework` |
+| `versionedDocs` | `true` |

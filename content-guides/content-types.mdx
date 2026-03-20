@@ -1,0 +1,238 @@
+---
+title: Content Types
+description: Overview of the documentation content types used in HashiCorp Web Unified Docs, based on the Diátaxis framework, including templates for Usage, Concept, Overview, and Reference pages.
+---
+
+HashiCorp documentation on [developer.hashicorp.com](https://developer.hashicorp.com) follows the principles of the [Diátaxis method for structured documentation](https://diataxis.fr/). Every page belongs to one of four content types, each with a distinct purpose and audience need.
+
+<Note>
+Tutorials are hosted in a separate repository. This guide focuses on Explanation, Usage, and Reference content types.
+</Note>
+
+## Content type overview
+
+<CardGroup cols={2}>
+  <Card title="Explanation" icon="book-open">
+    Conceptual content that helps readers understand a product's underlying systems, architecture, and workflows. Includes Index, Overview, and Concept pages.
+  </Card>
+  <Card title="Usage" icon="wrench">
+    Step-by-step procedural content that guides readers through completing a specific task.
+  </Card>
+  <Card title="Reference" icon="database">
+    Factual, scannable content for configuration options, CLI commands, and API endpoints.
+  </Card>
+  <Card title="Tutorials" icon="graduation-cap">
+    Hands-on learning content hosted in a separate tutorials repository.
+  </Card>
+</CardGroup>
+
+## Explanation pages
+
+Within the Explanation category, three distinct page subtypes serve different purposes.
+
+<AccordionGroup>
+  <Accordion title="Index pages">
+    Index pages provide lists of links to supporting documentation on a subject. They help readers navigate to the specific content they need.
+
+    **Example:** [Deploy Consul](https://developer.hashicorp.com/consul/docs/deploy)
+
+    Use an index page when a subject area has multiple supporting pages and readers benefit from a curated entry point with links rather than a full explanation.
+  </Accordion>
+  <Accordion title="Overview pages">
+    Overview pages provide an introduction to a subject and serve as a central information point. They explain what a feature or system is, why it matters, and link to related usage and reference content.
+
+    **Example:** [Expand service network east/west](https://developer.hashicorp.com/consul/docs/east-west)
+
+    Use an overview page when a subject area is broad enough to require orientation before a reader dives into tasks.
+  </Accordion>
+  <Accordion title="Concept pages">
+    Concept pages provide discursive explanations of a product's underlying systems and their operations. They define terms, explain how components relate, and give readers a mental model.
+
+    **Example:** [Consul catalog](https://developer.hashicorp.com/consul/docs/concept/catalog)
+
+    Use a concept page when readers need to understand *why* or *how* something works before they can effectively follow procedural guidance.
+  </Accordion>
+</AccordionGroup>
+
+## Page templates
+
+Use these templates as a starting point when creating a new page. Adapt the structure to fit your content, but keep the frontmatter fields and section order consistent.
+
+<Tabs>
+  <Tab title="Usage">
+    The usage template is for procedural, task-oriented content.
+
+    ```markdown
+    ---
+    page_title: Match the H1 and nav title
+    description: |-
+      Include target keywords and keyword phrases so that users can easily search.
+    ---
+
+    # Title
+
+    Explain what the topic is about.
+
+    ## Requirements
+
+    The requirements block describes the following information necessary to operate the product:
+
+    - system
+    - environment
+    - software requirements
+    - product version: Note that because we have versioned docs, specifying the core product
+      version is not as important as version requirements for ancillary software, such as `kubectl`.
+
+    ## Steps
+
+    Depending on the context, you can either add an introduction statement about the procedure
+    or begin describing the procedure directly.
+
+    1. If the procedure describes a series of commands, we recommend setting environment variables
+       as the first step so that you can use the variable name in subsequent commands.
+       Always link to the relevant [reference documentation](link):
+
+       <COMMAND>
+       <RESPONSE>
+
+    1. The next step may require the user to configure a file.
+       Always link to the relevant [reference documentation](link):
+
+       <CodeBlock>
+       </CodeBlock>
+
+    1. The final step may require another command:
+
+       <COMMAND>
+       <RESPONSE>
+
+    ## Next steps
+
+    Introduce related tasks that either enhance this topic or are necessary to achieve a larger goal.
+    Next steps link to other usage pages, rather than additional conceptual or reference information.
+    ```
+  </Tab>
+  <Tab title="Concept">
+    The concept template is for explanatory, definition-focused content.
+
+    ```markdown
+    ---
+    page_title: Page title matches the H1 page title
+    description: |-
+      Learn about the {topic} concepts for using {product}. As needed, include a second
+      sentence that elaborates on the concept.
+    ---
+
+    # Page title for Concepts (short) content
+
+    The first paragraph introduces the topic and summarizes the page content. Because this
+    page exists to explain related terms, this sentence should describe the overarching idea
+    that bridges these terms.
+
+    ## Context
+
+    The optional context block introduces the concept by explaining the relationship between
+    the product and the concept. Use one of the following labels:
+
+    - **Introduction**: Introduces terms, constructs, architectural components, and workflows
+    - **Background**: Provides historical or situational context
+
+    ## Concept 1
+
+    *Concept* is defined in the first sentence. The second sentence explains the concept's
+    overall importance to the product. The third sentence provides additional information.
+
+    ## Concept 2
+
+    Treat concept pages as the reference section for ideas and constructs. Other content types
+    should link to concept pages for information. Be concise but thorough.
+
+    ## Concept 3
+
+    You can include images or diagrams as necessary to explain concepts. Always include text
+    before the image to introduce it.
+
+    ![Include descriptive alt text for the image](/public/img/example.png)
+
+    Always include at least one sentence after an image for additional context.
+    ```
+  </Tab>
+  <Tab title="Overview">
+    The overview template is for broad, orientation-focused content.
+
+    ```markdown
+    ---
+    page_title: Overview topic template
+    description: |-
+      {Feature or thing} is {description of what it is} that you can use to
+      {list of things verbs corresponding to feature permutations}.
+    ---
+
+    # Overview topic template
+
+    The first paragraph describes the page's content.
+
+    ## Introduction
+
+    Introductory blocks are optional. If applicable, describe why the topic area is important.
+
+    ## Workflows
+
+    Use this section to summarize the main usage steps associated with the topic area.
+
+    ### Primary workflow
+
+    The overall process for {end goal of workflow} consists of the following steps:
+
+    1. First action users take to complete this workflow.
+    1. Second action for completing this workflow.
+    1. Final action common to the workflow.
+
+    ## Guidance
+
+    Some users land on an overview page and do not know where to go next. Use this section
+    to link to topics that help get started.
+
+    ### Tutorials
+
+    - To learn how to {do what the tutorial describes}, complete the [Name of tutorial](link).
+
+    ### Usage documentation
+
+    - [Usage page title](https://developer.hashicorp.com)
+
+    ### Reference
+
+    - [Reference page title](https://developer.hashicorp.com)
+
+    ### Constraints, limitations, and troubleshooting
+
+    - List limitations that inhibit functionality.
+    - List alternate approaches for completing usage tasks.
+    ```
+  </Tab>
+  <Tab title="Reference">
+    For configuration, CLI, API, and other reference content, find an existing page in your product's content directory and use it as a template. Reference pages vary significantly by product and content type, so there is no single universal template.
+
+    Common characteristics of reference pages:
+
+    - Scannable structure (tables, definition lists, code examples)
+    - Complete parameter or option coverage
+    - No procedural narrative — just facts
+    - Consistent formatting with other reference pages in the same product
+  </Tab>
+</Tabs>
+
+## When to use each content type
+
+| You want to... | Use this content type |
+| :--- | :--- |
+| Explain what something is or how it works | Concept |
+| Walk readers through completing a task | Usage |
+| Provide an entry point to a subject area | Index or Overview |
+| Document all options, flags, or parameters | Reference |
+| Teach through a hands-on exercise | Tutorial (separate repo) |
+
+<Tip>
+HashiCorp employees can refer to the [internal Technical Writing wiki](https://hashicorp.atlassian.net/wiki/x/eYBVnw) for detailed explanations and additional guidance on each content type.
+</Tip>

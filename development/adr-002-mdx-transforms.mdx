@@ -1,0 +1,71 @@
+---
+title: "ADR 002: MDX transforms at build time"
+description: The decision to apply MDX transforms — including the @include partial transform — during the prebuild script rather than at request time.
+---
+
+<Info>
+  **Status:** Accepted
+</Info>
+
+## Context
+
+This project committed to API parity with `content.hashicorp.com` in [ADR 001](/development/adr-001-api-parity). Achieving content parity requires producing exactly the same content that the existing API serves.
+
+In the existing system, some MDX transforms are applied during the `extract-content` workflow — before content is added to the database that backs the API. As a result, the existing API returns content with those transforms already applied. Other transforms are applied server-side in dev-portal at request time.
+
+The most critical pre-applied transform is the `@include` directive, which inserts the contents of `partial` files into other `.mdx` files. The `@include` transform requires access to the folder of partial files at transform time. In the initial prototype of web-unified-docs, `@include` was not functional because no transforms were applied before serving content.
+
+The question was: **where should these transforms be applied in the new system?**
+
+## Decision
+
+MDX transforms are applied as part of the prebuild script in the web-unified-docs repository.
+
+The prebuild script runs before the Next.js build (and at container startup in the Docker Compose setup). It reads source `.mdx` files from the `content/` directory, applies transforms, and writes transformed files to `public/content/`.
+
+The unified docs API then serves content from `public/content/` rather than directly from `content/`.
+
+### What is not included in this decision
+
+**Transformed content is not committed to version control.** The `public/content/` directory is in `.gitignore`. Only source files in `content/` are tracked.
+
+**Not all transforms are required to run at build time.** Some transforms may be better suited to running server-side in dev-portal, just as they do today. The decision explicitly leaves this door open. For example, in the existing system, transforms that might need to change over time are kept in dev-portal server functions so they can be updated without touching the database. While this specific constraint does not apply to web-unified-docs in the same way, other reasons to keep some transforms in dev-portal may arise.
+
+## How it works
+
+The prebuild script (`scripts/prebuild/prebuild.mjs`) orchestrates the following steps:
+
+```
+content/ (source, version-controlled)
+    ↓ MDX transforms (buildMdxTransforms)
+public/content/ (output, not version-controlled)
+```
+
+Specific steps in the prebuild:
+
+1. **Gather version metadata** — reads `content/` to determine which product versions exist
+2. **Gather all-versions docs paths** — builds an index of all documentation paths
+3. **Apply MDX transforms** — reads from `content/`, writes transformed MDX to `public/content/`
+4. **Copy nav-data files** — copies `*-nav-data.json` files from `content/` to `public/content/`
+5. **Copy redirect files** — copies `redirects.jsonc` files from `content/` to `public/content/`
+6. **Copy asset files** — copies images and other assets from `content/` to `public/assets/`
+
+The MDX transforms are implemented in `scripts/prebuild/mdx-transforms/`.
+
+## Consequences
+
+**Positive consequences:**
+
+- The `@include` partial transform works correctly. Content authors can use `@include` to insert shared content from partial files, matching the behavior of the existing API.
+- Content parity with the existing API is achievable. The same transforms that the existing system applies before storing content in the database are now applied during the prebuild.
+- The transform workflow is consistent across local development, deploy preview, and production builds.
+
+**Negative consequences:**
+
+- Build times for web-unified-docs increase. The prebuild script must process all `.mdx` files before the Next.js build can run. For large volumes of content, this adds significant time.
+  - This is mitigated in production by the `INCREMENTAL_BUILD` flag, which enables the prebuild to process only changed files.
+
+**Neutral consequences:**
+
+- The separation between `content/` (source) and `public/content/` (transformed output) creates a clear boundary between authored content and served content.
+- Original authored MDX files are no longer directly accessible through the Vercel CDN. This is acceptable because dev-portal needs transformed content, not raw source.

@@ -1,0 +1,114 @@
+---
+title: Redirects
+description: Return the redirect rules for a product, used by dev-portal to handle URL changes across documentation versions.
+---
+
+## Endpoint
+
+```
+GET /api/content/:productSlug/redirects
+```
+
+Returns the array of redirect rules defined for a product. dev-portal uses these rules to redirect users from old documentation URLs to their current locations.
+
+The route always serves the redirects for the `latest` version of the product, reading from a `redirects.jsonc` file in the product's versioned content directory.
+
+<Note>
+  Unlike other content endpoints, this route does not accept a `version` parameter. It always resolves to the latest version's redirect rules.
+</Note>
+
+## Path parameters
+
+<ParamField path="productSlug" type="string" required>
+  The slug identifying the product.
+
+  Examples: `terraform-plugin-framework`, `terraform-enterprise`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Fetch redirects for terraform-plugin-framework
+curl http://localhost:8080/api/content/terraform-plugin-framework/redirects
+```
+
+```bash Fetch redirects for terraform-enterprise
+curl http://localhost:8080/api/content/terraform-enterprise/redirects
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON array of redirect rule objects. Each object maps a source path to a destination path.
+
+```json 200
+[
+  {
+    "source": "/terraform/plugin/framework/old-page",
+    "destination": "/terraform/plugin/framework/new-page",
+    "permanent": true
+  },
+  {
+    "source": "/terraform/plugin/framework/removed",
+    "destination": "/terraform/plugin/framework",
+    "permanent": false
+  }
+]
+```
+
+### Response fields
+
+The response is a top-level JSON array. Each element is a redirect rule object:
+
+<ResponseField name="source" type="string" required>
+  The original URL path that should redirect. May include path segments but does not include the hostname.
+</ResponseField>
+
+<ResponseField name="destination" type="string" required>
+  The target URL path to redirect to.
+</ResponseField>
+
+<ResponseField name="permanent" type="boolean">
+  When `true`, the redirect is treated as a permanent (301) redirect. When `false` or absent, it is a temporary (302) redirect.
+</ResponseField>
+
+### Response headers
+
+| Header | Description |
+|--------|-------------|
+| `content-type` | Always `application/json` |
+| `served-from` | Indicates whether content was served from `current build` or `production` |
+
+## How redirects files are structured
+
+Redirect rules are stored as JSONC (JSON with comments) files at `content/<productSlug>/<version>/redirects.jsonc`. JSONC allows inline comments to document the reason for each redirect.
+
+```
+content/
+  terraform-plugin-framework/
+    v1.10.x/
+      redirects.jsonc
+```
+
+Example `redirects.jsonc`:
+
+```jsonc
+// Redirects for terraform-plugin-framework
+[
+  {
+    // Renamed in v1.8.0
+    "source": "/terraform/plugin/framework/migrating",
+    "destination": "/terraform/plugin/framework/guides/framework-migration",
+    "permanent": true
+  }
+]
+```
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | The `productSlug` is not in the product configuration, the latest version metadata could not be resolved, or no `redirects.jsonc` file exists for the product. |
+| `500` | `Server error` | The `redirects.jsonc` file exists but could not be parsed. |

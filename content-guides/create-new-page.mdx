@@ -1,0 +1,176 @@
+---
+title: Create a New Page
+description: Step-by-step instructions for creating a new documentation page in HashiCorp Web Unified Docs, including file placement, frontmatter requirements, and adding the page to the navigation sidebar.
+---
+
+Follow these four steps to create a new content page in `web-unified-docs`.
+
+<Steps>
+  <Step title="Decide your content type">
+    Decide whether your content is a concept, usage guide, overview, index, or reference page. Refer to the [Content Types](/content-guides/content-types) guide for detailed explanations and templates.
+
+    If you have questions about which type fits your content, reach out to your product's tech writer team.
+  </Step>
+
+  <Step title="Create the page file">
+    Decide which directory your new content belongs in within your product's most recent version folder.
+
+    | Section | Common directory location |
+    | :--- | :--- |
+    | Documentation | `docs/` |
+    | CLI reference | `commands/`, `docs/commands/`, or `docs/cli/` (varies by product) |
+    | API reference | `api-docs/` (varies by product — check with your team before creating API content manually) |
+
+    <Note>
+    The path in the version content directory becomes the URL route. For example, if you add `my-new-page.mdx` to `web-unified-docs/content/vault/v1.20.x/docs/concepts` and `v1.20.x` is the latest version, the website URL will be `https://developer.hashicorp.com/vault/docs/concepts/my-new-page`.
+    </Note>
+
+    Create a file ending in `.mdx` in the appropriate directory. Choose a short filename that describes your page's topic. Do **not** repeat the folder name in the file name.
+  </Step>
+
+  <Step title="Create your content">
+    Use the appropriate page template from the [Content Types](/content-guides/content-types) guide as a starting point.
+
+    Every page requires YAML frontmatter with at minimum a `title` and `description`:
+
+    ```yaml
+    ---
+    title: 'My Title'
+    description: "A thorough, yet succinct description of the page's contents"
+    ---
+    ```
+
+    Follow the Education style guide's top 12 guidelines when creating your content.
+  </Step>
+
+  <Step title="Add the page to the navigation sidebar">
+    Your page will **not** render on the website until you add an entry to the navigation sidebar file.
+
+    Sidebar files live in the product's `<version>/data` directory. For example, `docs-nav-data.json` controls the sidebar for the `docs` section.
+
+    In the example below, the new file is `web-unified-docs/content/vault/v1.20.x/docs/concepts/tokens.mdx` with the title "Tokens". Add the new page to the section of `docs-nav-data.json` that corresponds to the filesystem directory:
+
+    <CodeGroup>
+
+    ```text Filesystem
+    vault
+    ├── 1.20.x
+    │   └── docs
+    │       └── concepts
+    │           ├── index.mdx
+    │           ├── seal.mdx
+    │           ├── tokens.mdx   ← new file
+    ```
+
+    ```json docs-nav-data.json
+    {
+      "title": "Key concepts",
+      "routes": [
+        {
+          "title": "Overview",
+          "path": "concepts"
+        },
+        {
+          "title": "Seal/Unseal",
+          "path": "concepts/seal"
+        },
+        {
+          "title": "Tokens",
+          "path": "concepts/tokens"
+        }
+      ]
+    }
+    ```
+
+    </CodeGroup>
+
+    Refer to the [Navigation Sidebars](/content-guides/navigation-sidebars) guide for a full explanation of the sidebar data format, custom links, and nested entries.
+  </Step>
+</Steps>
+
+## Sidebar deep dive
+
+The sidebar uses a simple recursive data structure to represent files and directories. It mirrors the filesystem structure while allowing custom ordering.
+
+Given this directory layout:
+
+```text
+.
+├── docs
+│   └── directory
+│       ├── index.mdx
+│       ├── file.mdx
+│       ├── another-file.mdx
+│       └── nested-directory
+│           ├── index.mdx
+│           └── nested-file.mdx
+```
+
+The corresponding `docs-nav-data.json` entry:
+
+```json
+[
+  {
+    "title": "Directory",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "directory"
+      },
+      {
+        "title": "File",
+        "path": "directory/file"
+      },
+      {
+        "title": "Another File",
+        "path": "directory/another-file"
+      },
+      {
+        "title": "Nested Directory",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "directory/nested-directory"
+          },
+          {
+            "title": "Nested File",
+            "path": "directory/nested-directory/nested-file"
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+Key rules:
+
+- **Ordering is flexible, hierarchy is not.** You can reorder siblings, but you cannot un-nest a directory entry without also un-nesting it in the filesystem.
+- The `title` property is the human-readable label shown in the navigation.
+- The `path` property on leaf nodes is the URL path where the `.mdx` document renders.
+- `index.mdx` files must be explicitly listed, but the path resolves from the directory name — use `"path": "directory"` rather than `"path": "directory/index"`.
+- A common convention is to set the `title` of an index node to `"Overview"`.
+
+## Custom and external links
+
+You can include links in the sidebar that point outside the docs hierarchy using the `href` property instead of `path`:
+
+```json
+[
+  {
+    "name": "Directory",
+    "routes": [
+      {
+        "title": "File",
+        "path": "directory/file"
+      },
+      {
+        "title": "Tao of HashiCorp",
+        "href": "https://www.hashicorp.com/tao-of-hashicorp"
+      }
+    ]
+  }
+]
+```
+
+External links (those with a full URL in `href`) display a small external link icon. Internal links using `href` appear the same as regular file links.

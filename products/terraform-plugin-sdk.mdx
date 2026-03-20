@@ -1,0 +1,102 @@
+---
+title: Terraform Plugin SDK
+description: Terraform Plugin SDK documentation in the web-unified-docs repository — for developers building Terraform providers with SDKv2.
+---
+
+The Terraform Plugin SDK (SDKv2) is the legacy SDK for building Terraform providers. Its documentation covers provider schema definitions, resource lifecycle, acceptance testing, and migration guidance to the Plugin Framework. It is versioned and stored in `content/terraform-plugin-sdk/`.
+
+The content API uses the `terraform` product slug. The `navDataPath` for this directory is `plugin-sdkv2`, and content is served under the `/plugin/sdkv2/` URL base path.
+
+<Info>
+For new provider development, HashiCorp recommends using the [Terraform Plugin Framework](/products/terraform-plugin-framework) instead of the Plugin SDK. The Plugin SDK remains supported for existing providers.
+</Info>
+
+## Content directory
+
+```text
+content/terraform-plugin-sdk/
+├── v2.15.x/
+├── v2.16.x/
+├── v2.17.x/
+├── v2.18.x/
+├── v2.19.x/
+├── v2.20.x/
+├── v2.21.x/
+├── v2.22.x/
+├── v2.23.x/
+├── v2.24.x/
+├── v2.25.x/
+├── v2.26.x/
+├── v2.27.x/
+├── v2.28.x/
+├── v2.29.x/
+├── v2.30.x/
+├── v2.31.x/
+├── v2.32.x/
+├── v2.33.x/
+├── v2.34.x/
+├── v2.35.x/
+├── v2.36.x/
+├── v2.37.x/
+├── v2.38.x/
+└── v2.39.x/
+```
+
+Each version directory follows the standard structure:
+
+```text
+content/terraform-plugin-sdk/<version>/
+├── docs/            # Markdown content files
+├── data/            # Navigation sidebar JSON files
+└── img/             # Image assets
+```
+
+## URL base paths
+
+Terraform Plugin SDK content is served under `/plugin/sdkv2/`.
+
+## Available versions
+
+Versions `v2.15.x` through `v2.39.x` are present in the repository.
+
+<Warning>
+Older versions (v2.15.x and earlier) may fail migration scripts with errors indicating missing `img/`, `docs/`, or `data/` directories. Confirm the directory structure before editing older versions.
+</Warning>
+
+## Finding and editing Plugin SDK docs
+
+<Steps>
+  <Step title="Find the version directory">
+    List the available version directories:
+
+    ```shell-session
+    ls content/terraform-plugin-sdk/
+    ```
+  </Step>
+  <Step title="Navigate to the content files">
+    Content files are in the `docs/` subdirectory within each version folder:
+
+    ```shell-session
+    ls content/terraform-plugin-sdk/v2.39.x/docs/
+    ```
+  </Step>
+  <Step title="Edit the file">
+    Open the `.mdx` file you want to change.
+  </Step>
+  <Step title="Update navigation if needed">
+    Navigation sidebar data is in `content/terraform-plugin-sdk/<version>/data/`.
+  </Step>
+</Steps>
+
+## Product configuration reference
+
+| Attribute | Value |
+| :-------- | :---- |
+| `productSlug` | `terraform` |
+| `navDataPath` | `plugin-sdkv2` |
+| `contentDir` | `docs` (in source repo) |
+| `websiteDir` | `website` (in source repo) |
+| `dataDir` | `data` |
+| `assetDir` | `img` |
+| `basePaths` | `plugin/sdkv2` |
+| `versionedDocs` | `true` |
