@@ -1,0 +1,83 @@
+---
+title: Assets
+description: Serve binary assets such as images and diagrams from the product documentation content directory.
+---
+
+## Endpoint
+
+```
+GET /api/assets/:productSlug/:version/:assetPath
+```
+
+Serves binary assets (images, diagrams, and other files) from the product's versioned content directory. dev-portal uses this endpoint to load images embedded in documentation pages.
+
+Assets are stored under `assets/<productSlug>/<version>/` in the repository's build output. The `content-type` response header is set based on the asset's file extension.
+
+## Path parameters
+
+<ParamField path="productSlug" type="string" required>
+  The slug identifying the product whose assets you want to retrieve.
+
+  Examples: `terraform-plugin-framework`, `vault`, `consul`
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  The documentation version. Use `latest` to resolve to the most recent stable version.
+
+  Examples: `latest`, `v1.9.x`, `v20220610-01`
+</ParamField>
+
+<ParamField path="assetPath" type="string" required>
+  The path to the asset within the product's assets directory. Segments are joined with `/`.
+
+  Example: `img/docs/plan-comments.png`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Fetch an image from the latest version
+curl http://localhost:8080/api/assets/terraform-plugin-framework/latest/img/docs/overview.png
+```
+
+```bash Fetch an image from a specific version
+curl http://localhost:8080/api/assets/vault/v1.20.x/img/vault-seal-workflow.png
+```
+
+</CodeGroup>
+
+## Response
+
+Returns the raw binary content of the asset with an appropriate `content-type` header.
+
+### Response headers
+
+| Header | Description |
+|--------|-------------|
+| `content-type` | MIME type of the asset, determined from the file extension (e.g., `image/png`, `image/svg+xml`) |
+| `served-from` | Indicates whether the asset was served from `current build` or `production` |
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | The `productSlug` is not in the product configuration, the `version` does not exist, or no asset was found at the specified `assetPath`. |
+
+## How assets are stored
+
+Assets are copied from product content directories during the prebuild step into `public/assets/<productSlug>/<version>/`. The API reads assets from this pre-built output directory rather than from the `content/` source directory directly.
+
+```
+public/
+  assets/
+    terraform-plugin-framework/
+      v1.15.x/
+        img/
+          docs/
+            overview.png
+    vault/
+      v1.20.x/
+        img/
+          vault-seal-workflow.png
+```

@@ -1,0 +1,77 @@
+---
+title: Version metadata
+description: Return version metadata for a product, including all available versions and their resolved version strings.
+---
+
+## Endpoint
+
+```
+GET /api/content/:productSlug/version-metadata
+```
+
+Returns version metadata for a product. This includes the full list of available versions, their resolved version strings, and any version-to-version alias mappings. dev-portal uses this endpoint to populate version pickers and route version-specific content requests.
+
+## Path parameters
+
+<ParamField path="productSlug" type="string" required>
+  The slug identifying the product.
+
+  Examples: `terraform-plugin-framework`, `terraform-enterprise`, `vault`
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash Fetch version metadata for terraform-plugin-framework
+curl http://localhost:8080/api/content/terraform-plugin-framework/version-metadata
+```
+
+```bash Fetch version metadata for terraform-enterprise
+curl http://localhost:8080/api/content/terraform-enterprise/version-metadata
+```
+
+</CodeGroup>
+
+## Response
+
+Returns a JSON object with a `result` field containing the product's version metadata.
+
+```json 200
+{
+  "result": [
+    {
+      "version": "v1.15.x",
+      "isLatest": true
+    },
+    {
+      "version": "v1.14.x",
+      "isLatest": false
+    },
+    {
+      "version": "v1.13.x",
+      "isLatest": false
+    }
+  ]
+}
+```
+
+### Response fields
+
+<ResponseField name="result" type="object[]" required>
+  Array of version metadata objects, one per available version for the product.
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="version" type="string">
+      The version string. For most products this is a semver-style string like `v1.9.x`. For Terraform Enterprise, it is a date-based string like `v20220610-01`.
+    </ResponseField>
+    <ResponseField name="isLatest" type="boolean">
+      Whether this version is the current latest stable version. Only one version will have `isLatest: true`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error responses
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `404` | `Not found` | The `productSlug` is not in the product configuration, or version metadata could not be resolved. |

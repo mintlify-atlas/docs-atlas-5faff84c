@@ -8,10 +8,6 @@
     "dark": "#242b2c"
   },
   "favicon": "/favicon.svg",
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
   "navbar": {
     "primary": {
       "type": "github",
@@ -121,7 +117,9 @@
               "api/content-versions",
               "api/supported-products",
               "api/nav-data",
-              "api/redirects"
+              "api/redirects",
+              "api/version-metadata",
+              "api/assets"
             ]
           }
         ]

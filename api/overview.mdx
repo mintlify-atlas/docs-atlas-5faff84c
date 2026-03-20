@@ -86,6 +86,16 @@ You can verify the API is fully initialized by visiting `http://localhost:8080/a
 
     Return the redirect rules for a product.
   </Card>
+  <Card title="Version metadata" icon="tag" href="/api/version-metadata">
+    `GET /api/content/:productSlug/version-metadata`
+
+    Return version metadata for a product including all available versions.
+  </Card>
+  <Card title="Assets" icon="image" href="/api/assets">
+    `GET /api/assets/:productSlug/:version/:assetPath`
+
+    Serve binary assets such as images from the product content directory.
+  </Card>
 </CardGroup>
 
 ## Example request
